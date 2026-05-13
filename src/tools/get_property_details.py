@@ -1,4 +1,4 @@
-"""Tool: get_property_details(url) — fetch a Fotocasa listing and parse its embedded JSON."""
+"""Tool: get_property_details(url) — fetch an Otodom listing and parse its embedded JSON."""
 from __future__ import annotations
 
 import json
@@ -15,18 +15,19 @@ USER_AGENT = (
 SCHEMA = {
     "name": "get_property_details",
     "description": (
-        "Fetch a Fotocasa property listing URL and return its structured data: "
-        "price, surface (m²), bedrooms, bathrooms, floor, construction state, "
-        "energy rating, full address (district, municipality, province), "
-        "coordinates, agent description, amenities, and image URLs. "
-        "Always call this first when analysing a property."
+        "Fetch an Otodom property listing URL and return its structured data: "
+        "price (PLN), surface (m²), rooms, floor, build year, building type, "
+        "ownership form, monthly community fee (czynsz administracyjny), "
+        "heating type, full address (district, city), coordinates, agent "
+        "description, amenities, and image URLs. Always call this first when "
+        "analysing a Warsaw property."
     ),
     "input_schema": {
         "type": "object",
         "properties": {
             "url": {
                 "type": "string",
-                "description": "Full Fotocasa listing URL (e.g. https://www.fotocasa.es/.../d).",
+                "description": "Full Otodom listing URL (e.g. https://www.otodom.pl/pl/oferta/...).",
             },
         },
         "required": ["url"],
@@ -35,13 +36,27 @@ SCHEMA = {
 }
 
 
+def _to_int(v: Any) -> int | None:
+    try:
+        return int(v) if v not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _to_float(v: Any) -> float | None:
+    try:
+        return float(v) if v not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+
 def get_property_details(url: str) -> dict[str, Any]:
     response = httpx.get(
         url,
         headers={
             "User-Agent": USER_AGENT,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.9,es;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9,pl;q=0.8",
         },
         follow_redirects=True,
         timeout=15.0,
@@ -49,51 +64,63 @@ def get_property_details(url: str) -> dict[str, Any]:
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")
-    raw = soup.find("script", id="__initial_props__")
+    raw = soup.find("script", id="__NEXT_DATA__")
     if raw is None or not raw.string:
         raise RuntimeError(
-            "No __initial_props__ script tag found — Fotocasa page structure may have changed."
+            "No __NEXT_DATA__ script tag found — Otodom page structure may have changed."
         )
 
     data = json.loads(raw.string)
-    detail = data["realEstateAdDetailEntityV2"]
-    real_estate = data["realEstate"]
-    address = real_estate["address"]
-    features = real_estate["features"]
-    feats_named = {f["label"]: f["value"] for f in real_estate["featuresList"]}
+    ad = data["props"]["pageProps"]["ad"]
+
+    # Otodom keeps numeric data in a flat list of {key, value} dicts.
+    chars = {c["key"]: c["value"] for c in (ad.get("characteristics") or [])}
+
+    address = ((ad.get("location") or {}).get("address")) or {}
+    coordinates = ((ad.get("location") or {}).get("coordinates")) or {}
+
+    # Description ships as HTML — strip tags for clean text.
+    description_text = BeautifulSoup(
+        ad.get("description") or "", "html.parser"
+    ).get_text(separator=" ", strip=True)
 
     return {
         "url": url,
-        "id": str(real_estate["id"]),
-        "title": data.get("propertyTitle"),
-        "price_eur": real_estate["price"],
-        "surface_m2": features.get("surface"),
-        "bedrooms": features.get("rooms"),
-        "bathrooms": features.get("bathrooms"),
-        "floor": feats_named.get("floor"),
-        "antiquity": feats_named.get("antiquity"),
-        "conservation_state": feats_named.get("conservationState"),
-        "heating": feats_named.get("heating"),
-        "hot_water": feats_named.get("hotWater"),
-        "elevator": feats_named.get("elevator") == "YES",
-        "furnished": feats_named.get("furnished") == "YES",
-        "parking": feats_named.get("parking"),
-        "typology": feats_named.get("typology"),
-        "energy_rating": (detail.get("energyCertificate") or {}).get("energyEfficiencyRatingType"),
+        "id": str(ad["id"]),
+        "title": ad.get("title"),
+        "price_pln": _to_int(chars.get("price")),
+        "price_per_m2_pln": _to_int(chars.get("price_per_m")),
+        "monthly_community_fee_pln": _to_int(chars.get("rent")),
+        "surface_m2": _to_float(chars.get("m")),
+        "rooms": _to_int(chars.get("rooms_num")),
+        "floor": chars.get("floor_no"),
+        "total_floors": _to_int(chars.get("building_floors_num")),
+        "build_year": _to_int(chars.get("build_year")),
+        "building_type": chars.get("building_type"),
+        "building_material": chars.get("building_material"),
+        "construction_status": chars.get("construction_status"),
+        "windows_type": chars.get("windows_type"),
+        "heating": chars.get("heating"),
+        "ownership_form": chars.get("building_ownership"),
+        "market": chars.get("market"),
+        "free_from": chars.get("free_from"),
         "address": {
-            "municipality": address.get("municipality"),
-            "district": address.get("district"),
-            "city": address.get("city"),
-            "province": address.get("province"),
-            "zip_code": address.get("zipCode"),
-            "upper_level": address.get("upperLevel"),
+            "street": ((address.get("street") or {}).get("name")),
+            "district": ((address.get("district") or {}).get("name")),
+            "subdistrict": ((address.get("subdistrict") or {}).get("name")) if address.get("subdistrict") else None,
+            "city": ((address.get("city") or {}).get("name")),
+            "province": ((address.get("province") or {}).get("name")),
+            "postal_code": address.get("postalCode"),
         },
         "coordinates": {
-            "latitude": real_estate["coordinates"]["latitude"],
-            "longitude": real_estate["coordinates"]["longitude"],
+            "latitude": coordinates.get("latitude"),
+            "longitude": coordinates.get("longitude"),
         },
-        "amenities": real_estate.get("extras", []),
-        "description_es": (real_estate.get("descriptions") or {}).get("es-ES"),
-        "image_urls": [m["src"] for m in real_estate.get("multimedia", []) if m.get("type") == "image"],
-        "publisher_name": (detail.get("publisher") or {}).get("name"),
+        "amenities": ad.get("features") or [],
+        "description_pl": description_text,
+        "image_urls": [
+            img.get("large") for img in (ad.get("images") or []) if img.get("large")
+        ],
+        "advert_type": ad.get("advertType"),
+        "created_at": ad.get("createdAt"),
     }

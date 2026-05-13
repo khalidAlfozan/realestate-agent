@@ -1,7 +1,7 @@
 """Hand-rolled agent loop using the Anthropic SDK and Claude tool-use.
 
 Run from the project root:
-    uv run python -m src.agent <fotocasa-url>
+    uv run python -m src.agent <otodom-url>
 """
 from __future__ import annotations
 
@@ -93,11 +93,11 @@ def run_agent(user_message: str, *, max_iterations: int = 10) -> str:
 
 def main() -> int:
     if len(sys.argv) < 2:
-        print("usage: python -m src.agent <fotocasa-url>", file=sys.stderr)
+        print("usage: python -m src.agent <otodom-url>", file=sys.stderr)
         return 1
     url = sys.argv[1]
     memo = run_agent(
-        f"Analyse this Madrid property as a long-term rental investment: {url}"
+        f"Analyse this Warsaw property as a long-term rental investment: {url}"
     )
     print(memo)
     return 0
