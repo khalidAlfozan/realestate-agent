@@ -25,7 +25,7 @@ A single-user investment-analyst agent for the Madrid residential rental market.
 ## What it doesn't do
 
 - **Not multi-tenant.** One user, one local instance.
-- **Not multi-city.** Madrid only. No Costa del Sol, Barcelona, or other markets.
+- **Not multi-city.** Madrid only.
 - **Not multi-asset-type.** Long-term residential rentals only — no short-lets/Airbnb, no commercial, no new-build off-plan, no land.
 - **No anti-bot arms race.** If Idealista blocks scraping, fall back to user-pasted text. Don't burn the v1 budget on scraper hardening.
 - **No transactional features.** No saved searches, no alerts, no portfolio tracking, no user accounts, no payments.
