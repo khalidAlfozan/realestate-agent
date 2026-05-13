@@ -1,0 +1,19 @@
+[project]
+name = "realestate-agent"
+version = "0.1.0"
+description = "Madrid residential investment-analyst agent."
+requires-python = ">=3.13"
+dependencies = [
+    "anthropic>=0.101.0",
+    "beautifulsoup4>=4.14.3",
+    "httpx>=0.28.1",
+    "pgvector>=0.4.2",
+    "psycopg[binary]>=3.3.4",
+    "python-dotenv>=1.2.2",
+    "voyageai>=0.3.7",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
