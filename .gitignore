@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project-specific: market-report PDFs are large and license-restricted; track only the dir
+data/corpus/*.pdf
+data/corpus/*.PDF
