@@ -223,3 +223,8 @@ __marimo__/
 # Project-specific: market-report PDFs are large and license-restricted; track only the dir
 data/corpus/*.pdf
 data/corpus/*.PDF
+
+# Eval harness cache — generated memos, not reproducible artefacts (the API
+# response varies). Track the dir via .gitkeep, ignore the contents.
+evals/cache/*
+!evals/cache/.gitkeep
