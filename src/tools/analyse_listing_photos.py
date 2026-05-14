@@ -33,7 +33,7 @@ from src.models import PhotoAnalysis, _PhotoAnalysisLLM
 # classification. Sonnet would be overkill here.
 MODEL_VISION = "claude-haiku-4-5"
 MAX_TOKENS_VISION = 1024
-DEFAULT_MAX_PHOTOS = 6
+DEFAULT_MAX_PHOTOS = 20
 IMAGE_FETCH_TIMEOUT_S = 15.0
 
 # Mimic a real browser when fetching images from Otodom's CDN. The CDN
