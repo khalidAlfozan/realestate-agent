@@ -18,6 +18,11 @@ from src.tools.get_property_details import get_property_details
 FIXTURE_URL = "https://www.otodom.pl/pl/oferta/test-fixture-wola"
 FIXTURE_HTML = (Path(__file__).parent / "fixtures" / "otodom_wola.html").read_text()
 
+# Outer-Warsaw listing — district resolution must come from reverseGeocoding,
+# not the misleading address.district (which says "Stara Miłosna").
+FIXTURE_URL_WESOLA = "https://www.otodom.pl/pl/oferta/test-fixture-wesola"
+FIXTURE_HTML_WESOLA = (Path(__file__).parent / "fixtures" / "otodom_wesola.html").read_text()
+
 
 def test_parses_headline_fields(httpx_mock: HTTPXMock) -> None:
     httpx_mock.add_response(url=FIXTURE_URL, text=FIXTURE_HTML)
@@ -88,3 +93,21 @@ def test_raises_on_missing_next_data(httpx_mock: HTTPXMock) -> None:
 
     with pytest.raises(RuntimeError, match="__NEXT_DATA__"):
         get_property_details(FIXTURE_URL)
+
+
+def test_outer_warsaw_district_uses_administrative_hierarchy(httpx_mock: HTTPXMock) -> None:
+    """For outer-Warsaw listings, address.district returns the residential
+    area ("Stara Miłosna") instead of the actual administrative district
+    ("Wesoła"). The parser must use reverseGeocoding to get the correct
+    district — otherwise find_comparable_properties builds a 404 search URL.
+    """
+    httpx_mock.add_response(url=FIXTURE_URL_WESOLA, text=FIXTURE_HTML_WESOLA)
+
+    result = get_property_details(FIXTURE_URL_WESOLA)
+
+    # The fix: district is the administrative one, not the residential area.
+    assert result.address.district == "Wesoła"
+    # The residential area is preserved as subdistrict so the agent can still
+    # surface neighbourhood detail in the memo.
+    assert result.address.subdistrict == "Stara Miłosna"
+    assert result.address.city == "Warszawa"

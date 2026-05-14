@@ -54,6 +54,43 @@ def _to_float(v: Any) -> float | None:
         return None
 
 
+def _resolve_district(location: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Return (district, subdistrict) using the proper administrative hierarchy.
+
+    Otodom's `address.district` is misleading: for outer-Warsaw listings it
+    returns the **residential area** (e.g. "Stara Miłosna") rather than the
+    actual administrative district ("Wesoła"). Using the residential name
+    as `district` then 404s when find_comparable_properties builds a search
+    URL — the residential level isn't valid at that path position.
+
+    `reverseGeocoding.locations` carries the full administrative hierarchy
+    with explicit `locationLevel`s. Prefer that when available; fall back
+    to `address.district` when not.
+    """
+    rg_locations = (location.get("reverseGeocoding") or {}).get("locations") or []
+    by_level: dict[str, dict[str, Any]] = {
+        x.get("locationLevel"): x for x in rg_locations if x.get("locationLevel")
+    }
+
+    district = (by_level.get("district") or {}).get("name")
+    subdistrict = (by_level.get("residential") or {}).get("name")
+
+    # Fallback: if reverseGeocoding has no district entry (mid-Warsaw listings
+    # sometimes don't), use address.district directly.
+    if not district:
+        address = location.get("address") or {}
+        district = (address.get("district") or {}).get("name")
+
+    # Honour any address-level subdistrict if reverseGeocoding had nothing.
+    if not subdistrict:
+        address = location.get("address") or {}
+        subdistrict = (
+            (address.get("subdistrict") or {}).get("name") if address.get("subdistrict") else None
+        )
+
+    return district, subdistrict
+
+
 def get_property_details(url: str) -> PropertyDetails:
     response = httpx.get(
         url,
@@ -78,8 +115,10 @@ def get_property_details(url: str) -> PropertyDetails:
     ad = data["props"]["pageProps"]["ad"]
 
     chars = {c["key"]: c["value"] for c in (ad.get("characteristics") or [])}
-    address = ((ad.get("location") or {}).get("address")) or {}
-    coordinates = ((ad.get("location") or {}).get("coordinates")) or {}
+    location = ad.get("location") or {}
+    address = location.get("address") or {}
+    coordinates = location.get("coordinates") or {}
+    district, subdistrict = _resolve_district(location)
 
     description_text = BeautifulSoup(ad.get("description") or "", "html.parser").get_text(
         separator=" ", strip=True
@@ -107,10 +146,8 @@ def get_property_details(url: str) -> PropertyDetails:
         free_from=chars.get("free_from"),
         address=Address(
             street=((address.get("street") or {}).get("name")),
-            district=((address.get("district") or {}).get("name")),
-            subdistrict=((address.get("subdistrict") or {}).get("name"))
-            if address.get("subdistrict")
-            else None,
+            district=district,
+            subdistrict=subdistrict,
             city=((address.get("city") or {}).get("name")),
             province=((address.get("province") or {}).get("name")),
             postal_code=address.get("postalCode"),
