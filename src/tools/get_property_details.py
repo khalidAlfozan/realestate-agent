@@ -1,10 +1,12 @@
 """Tool: get_property_details(url) — fetch an Otodom listing and parse its embedded JSON."""
+
 from __future__ import annotations
 
 import json
 from typing import Any
 
 import httpx
+from anthropic.types import ToolParam
 from bs4 import BeautifulSoup
 
 USER_AGENT = (
@@ -12,7 +14,7 @@ USER_AGENT = (
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 )
 
-SCHEMA = {
+SCHEMA: ToolParam = {
     "name": "get_property_details",
     "description": (
         "Fetch an Otodom property listing URL and return its structured data: "
@@ -80,9 +82,9 @@ def get_property_details(url: str) -> dict[str, Any]:
     coordinates = ((ad.get("location") or {}).get("coordinates")) or {}
 
     # Description ships as HTML — strip tags for clean text.
-    description_text = BeautifulSoup(
-        ad.get("description") or "", "html.parser"
-    ).get_text(separator=" ", strip=True)
+    description_text = BeautifulSoup(ad.get("description") or "", "html.parser").get_text(
+        separator=" ", strip=True
+    )
 
     return {
         "url": url,
@@ -107,7 +109,9 @@ def get_property_details(url: str) -> dict[str, Any]:
         "address": {
             "street": ((address.get("street") or {}).get("name")),
             "district": ((address.get("district") or {}).get("name")),
-            "subdistrict": ((address.get("subdistrict") or {}).get("name")) if address.get("subdistrict") else None,
+            "subdistrict": ((address.get("subdistrict") or {}).get("name"))
+            if address.get("subdistrict")
+            else None,
             "city": ((address.get("city") or {}).get("name")),
             "province": ((address.get("province") or {}).get("name")),
             "postal_code": address.get("postalCode"),
@@ -118,9 +122,7 @@ def get_property_details(url: str) -> dict[str, Any]:
         },
         "amenities": ad.get("features") or [],
         "description_pl": description_text,
-        "image_urls": [
-            img.get("large") for img in (ad.get("images") or []) if img.get("large")
-        ],
+        "image_urls": [img.get("large") for img in (ad.get("images") or []) if img.get("large")],
         "advert_type": ad.get("advertType"),
         "created_at": ad.get("createdAt"),
     }

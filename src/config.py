@@ -1,4 +1,5 @@
 """Project config: env vars and shared paths."""
+
 from __future__ import annotations
 
 import os

@@ -1,24 +1,24 @@
-"""Hand-rolled agent loop using the Anthropic SDK and Claude tool-use.
+"""Hand-rolled agent loop using the Anthropic SDK and Claude tool-use."""
 
-Run from the project root:
-    uv run python -m src.agent <otodom-url>
-"""
 from __future__ import annotations
 
 import json
-import sys
-from typing import Any
+import logging
+from typing import Any, cast
 
 import anthropic
+from anthropic.types import MessageParam
 
-from src.config import ANTHROPIC_API_KEY, MAX_TOKENS, MODEL_AGENT, PROMPTS
-from src.tools import TOOL_FUNCTIONS, TOOLS
+from src.config import MAX_TOKENS, MODEL_AGENT, PROMPTS
+from src.tools import FUNCTIONS, SCHEMAS
 
 SYSTEM_PROMPT = (PROMPTS / "system.md").read_text()
 
+log = logging.getLogger(__name__)
+
 
 def _execute_tool(name: str, arguments: dict[str, Any]) -> str:
-    fn = TOOL_FUNCTIONS.get(name)
+    fn = FUNCTIONS.get(name)
     if fn is None:
         return json.dumps({"error": f"Unknown tool: {name}"})
     try:
@@ -30,24 +30,35 @@ def _execute_tool(name: str, arguments: dict[str, Any]) -> str:
 
 def _log_iteration(iteration: int, response: anthropic.types.Message) -> None:
     usage = response.usage
-    print(
-        f"[iter {iteration}] stop={response.stop_reason} "
-        f"in={usage.input_tokens} out={usage.output_tokens} "
-        f"cache_read={getattr(usage, 'cache_read_input_tokens', 0)} "
-        f"cache_write={getattr(usage, 'cache_creation_input_tokens', 0)}",
-        file=sys.stderr,
+    log.info(
+        "iter=%d stop=%s in=%d out=%d cache_read=%d cache_write=%d",
+        iteration,
+        response.stop_reason,
+        usage.input_tokens,
+        usage.output_tokens,
+        getattr(usage, "cache_read_input_tokens", 0),
+        getattr(usage, "cache_creation_input_tokens", 0),
     )
 
 
-def run_agent(user_message: str, *, max_iterations: int = 10) -> str:
-    """Drive the agent loop until end_turn; return the final assistant text."""
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+def run_agent(
+    client: anthropic.Anthropic,
+    user_message: str,
+    *,
+    max_iterations: int = 10,
+) -> str:
+    """Drive the agent loop until end_turn; return the final assistant text.
+
+    The Anthropic client is injected so callers (CLI, eval harness, future
+    Streamlit UI) can swap in recording / mocking clients without touching
+    the loop.
+    """
     messages: list[dict[str, Any]] = [{"role": "user", "content": user_message}]
 
     for iteration in range(max_iterations):
         # cache_control on the last system block caches tools+system together
-        # (tools render before system in the request). Stable prefix → cache hits
-        # on every iteration after the first.
+        # (tools render before system in the request). Stable prefix → cache
+        # hits on every iteration after the first.
         response = client.messages.create(
             model=MODEL_AGENT,
             max_tokens=MAX_TOKENS,
@@ -60,8 +71,8 @@ def run_agent(user_message: str, *, max_iterations: int = 10) -> str:
                     "cache_control": {"type": "ephemeral"},
                 }
             ],
-            tools=TOOLS,
-            messages=messages,
+            tools=SCHEMAS,
+            messages=cast(list[MessageParam], messages),
         )
         _log_iteration(iteration, response)
 
@@ -89,19 +100,3 @@ def run_agent(user_message: str, *, max_iterations: int = 10) -> str:
         messages.append({"role": "user", "content": tool_results})
 
     raise RuntimeError(f"Agent exceeded max_iterations={max_iterations}")
-
-
-def main() -> int:
-    if len(sys.argv) < 2:
-        print("usage: python -m src.agent <otodom-url>", file=sys.stderr)
-        return 1
-    url = sys.argv[1]
-    memo = run_agent(
-        f"Analyse this Warsaw property as a long-term rental investment: {url}"
-    )
-    print(memo)
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

@@ -1,7 +1,7 @@
 [project]
 name = "realestate-agent"
 version = "0.1.0"
-description = "Madrid residential investment-analyst agent."
+description = "Warsaw residential investment-analyst agent."
 requires-python = ">=3.13"
 dependencies = [
     "anthropic>=0.101.0",
@@ -15,5 +15,42 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pyright>=1.1.409",
     "pytest>=9.0.3",
+    "pytest-httpx>=0.36.2",
+    "ruff>=0.15.12",
 ]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "W",    # pycodestyle warnings
+    "I",    # isort (import order)
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "SIM",  # flake8-simplify
+    "RUF",  # ruff-native rules
+]
+ignore = [
+    "E501",  # line-too-long: ruff formatter handles long strings; we don't need to be strict
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.13"
+typeCheckingMode = "basic"
+reportMissingImports = "error"
+reportMissingTypeStubs = "none"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
