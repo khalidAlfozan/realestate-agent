@@ -110,3 +110,30 @@ class ComparablesResult(_Frozen):
     median_pln_per_m2: int | None = None
     p25_pln_per_m2: int | None = None
     p75_pln_per_m2: int | None = None
+
+
+class _PhotoAnalysisLLM(_Frozen):
+    """The strict shape the Haiku sub-call must produce (passed to messages.parse)."""
+
+    overall_condition: Literal["excellent", "good", "fair", "poor", "unclear"]
+    confidence: Literal["high", "medium", "low"]
+    summary: str
+    observations: list[str]
+    red_flags: list[str]
+
+
+class PhotoAnalysis(_Frozen):
+    """Result of `analyse_listing_photos` — LLM judgement + bookkeeping.
+
+    `photos_analysed` is added by the tool (not by the LLM) so the agent
+    knows how many of the available images were actually inspected and can
+    discount the assessment's confidence if only a few photos were seen.
+    """
+
+    overall_condition: Literal["excellent", "good", "fair", "poor", "unclear"]
+    confidence: Literal["high", "medium", "low"]
+    summary: str
+    observations: list[str]
+    red_flags: list[str]
+    photos_analysed: int
+    model_used: str
