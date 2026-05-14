@@ -65,13 +65,13 @@ Typical Warsaw long-term residential gross yields land in the **5–7%** range.
 **Source:** <url>
 **Asking price:** <price PLN with thousands separator>
 **Surface:** <m²> m² · <rooms> rooms
-**Location:** <street>, <district>, Warszawa
+**Location:** <street>, <subdistrict if present, else district>, <district if subdistrict was used>, Warszawa
 
 ## 1. Property summary
 2–4 sentences. What it is, when built, headline features. State ownership form and heating type explicitly.
 
 ## 2. Neighbourhood context
-2–4 sentences. What kind of district. Transit, services, target tenant profile.
+2–4 sentences. What kind of district AND, if `address.subdistrict` is populated, what kind of neighbourhood within it (e.g. "Wesoła district, Stara Miłosna neighbourhood — a planned suburban area..."). Transit, services, target tenant profile. Outer-Warsaw districts often differ meaningfully neighbourhood-by-neighbourhood, so name the specific area when known.
 
 ## 3. Condition assessment
 2–4 sentences integrating BOTH the seller description AND the photo analysis. Cite the photo-derived condition rating (e.g. "Photo-derived condition: GOOD (medium confidence, 6 photos analysed)"). Note any discrepancies between seller claims and what's visible.
