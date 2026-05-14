@@ -8,6 +8,7 @@ from typing import Any, cast
 
 import anthropic
 from anthropic.types import MessageParam
+from pydantic import BaseModel
 
 from src.config import MAX_TOKENS, MODEL_AGENT, PROMPTS
 from src.tools import FUNCTIONS, SCHEMAS
@@ -23,6 +24,8 @@ def _execute_tool(name: str, arguments: dict[str, Any]) -> str:
         return json.dumps({"error": f"Unknown tool: {name}"})
     try:
         result = fn(**arguments)
+        if isinstance(result, BaseModel):
+            return result.model_dump_json()
         return json.dumps(result, ensure_ascii=False, default=str)
     except Exception as exc:
         return json.dumps({"error": f"{type(exc).__name__}: {exc}"})
