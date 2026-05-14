@@ -1,7 +1,10 @@
 """Tool: calculate_gross_yield — back-of-envelope rental yield arithmetic."""
+
 from __future__ import annotations
 
-SCHEMA = {
+from anthropic.types import ToolParam
+
+SCHEMA: ToolParam = {
     "name": "calculate_gross_yield",
     "description": (
         "Compute gross rental yield for a property given the asking price and "
