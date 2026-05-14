@@ -32,6 +32,13 @@ def main(argv: list[str] | None = None) -> int:
     memo = run_agent(
         client, f"Analyse this Warsaw property as a long-term rental investment: {url}"
     )
+    # Belt-and-suspenders for the system prompt's "no preamble" rule:
+    # Sonnet 4.6 occasionally prepends a transition acknowledgment ("All
+    # tools done, writing the memo now") at the end of long tool chains.
+    # Strip anything before the memo's actual start.
+    marker = "# Investment Memo:"
+    if marker in memo:
+        memo = memo[memo.index(marker) :]
     print(memo)
     return 0
 
