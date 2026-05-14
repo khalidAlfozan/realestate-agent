@@ -16,8 +16,10 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "deptry>=0.25.1",
     "pyright>=1.1.409",
     "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
     "pytest-httpx>=0.36.2",
     "ruff>=0.15.12",
 ]
@@ -36,10 +38,24 @@ select = [
     "UP",   # pyupgrade
     "SIM",  # flake8-simplify
     "RUF",  # ruff-native rules
+    "C90",  # mccabe — cyclomatic complexity ceiling (default max 10)
+    "N",    # pep8-naming
+    "S",    # flake8-bandit (security)
+    "PT",   # flake8-pytest-style
+    "RET",  # flake8-return (no unnecessary else after return, etc.)
+    "ARG",  # flake8-unused-arguments
 ]
 ignore = [
     "E501",  # line-too-long: ruff formatter handles long strings; we don't need to be strict
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests legitimately use `assert` (S101), may use unused-arg fixtures (ARG002),
+# and have access to private symbols on purpose (the `_PhotoAnalysisLLM` import).
+"tests/**" = ["S101", "ARG002"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
 
 [tool.ruff.format]
 quote-style = "double"
@@ -54,4 +70,32 @@ reportMissingTypeStubs = "none"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-markers --cov --cov-report=term --cov-report=xml"
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = [
+    # Module entry-point shim — three trivial lines, not worth covering.
+    "src/__main__.py",
+]
+
+[tool.coverage.report]
+# Below this and CI fails. Current measured is ~78% line / ~75% with branch
+# coverage; threshold leaves modest headroom while ratcheting up over time as
+# agent.py / cli.py get tests.
+fail_under = 70
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.deptry]
+# These are pre-installed deps for Week 3 (RAG over Polish market reports).
+# They'll start showing imports once that work lands.
+[tool.deptry.per_rule_ignores]
+DEP002 = ["pgvector", "psycopg", "voyageai"]

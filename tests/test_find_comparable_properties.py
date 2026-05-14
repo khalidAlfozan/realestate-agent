@@ -69,10 +69,13 @@ def test_returns_comparables_and_summary_stats(httpx_mock: HTTPXMock) -> None:
     assert len(result.comparables) == result.count
 
     # Summary stats are populated
-    assert result.median_rent_pln is not None and result.median_rent_pln > 0
-    assert result.median_pln_per_m2 is not None and result.median_pln_per_m2 > 0
+    assert result.median_rent_pln is not None
+    assert result.median_rent_pln > 0
+    assert result.median_pln_per_m2 is not None
+    assert result.median_pln_per_m2 > 0
     p25, p75 = result.p25_pln_per_m2, result.p75_pln_per_m2
-    assert p25 is not None and p75 is not None
+    assert p25 is not None
+    assert p75 is not None
     assert p25 <= result.median_pln_per_m2 <= p75
 
 
