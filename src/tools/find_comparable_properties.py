@@ -32,8 +32,10 @@ SCHEMA: ToolParam = {
         "Search Otodom for comparable Warsaw properties of the same transaction "
         "type (rent or sale), in the same district, with similar room count "
         "(±1) and surface (±20%). Returns up to ~36 listings plus median/p25/p75 "
-        "rent-per-m² statistics. Use this BEFORE estimating monthly rent in the "
-        "memo so the rent benchmark is grounded in real comparables, not a prior."
+        "PLN/m² statistics. Call TWICE per memo: once with transaction_type='rent' "
+        "(to ground the monthly-rent estimate that drives yield) and once with "
+        "transaction_type='sale' (to judge whether the asking price is fair vs "
+        "the local market). Both calls are independent and should run in parallel."
     ),
     "input_schema": {
         "type": "object",
