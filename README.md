@@ -62,10 +62,9 @@ CI runs the following on every PR — see `.github/workflows/ci.yml`:
 | `ruff format --check` | Formatting drift |
 | `pyright` (basic) | Type errors |
 | `deptry` | Unused / missing / transitive deps |
-| `pytest --cov` | Tests + branch coverage; CI fails if total drops below **70%** |
+| `pytest --cov` | Tests + branch coverage; CI fails if total drops below **90%** |
 | `CodeQL` | GitHub-native SAST (security analysis). Results in the repo's **Security** tab. Runs on every PR + weekly schedule. |
 
-Ratchet up the coverage threshold over time as `agent.py` and `cli.py` get test coverage.
 
 ## Commit conventions
 
