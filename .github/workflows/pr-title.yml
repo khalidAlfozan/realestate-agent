@@ -1,0 +1,47 @@
+name: pr-title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+# Only one run per PR — re-runs on every edit, prior runs are cancelled.
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title against Conventional Commits
+        # main is squash-merged with linear history → the PR title becomes
+        # the squash commit message on main. Enforcing the title here means
+        # main's commit log is by-construction conventional-commits-clean,
+        # without forcing every intermediate PR-branch commit to comply.
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Angular Conventional Commits types (skipping perf/style as we don't realistically use them).
+          types: |
+            feat
+            fix
+            refactor
+            docs
+            test
+            chore
+            ci
+            build
+            revert
+          # Scopes are optional — `feat(tools): ...` and `feat: ...` both pass.
+          requireScope: false
+          # Subject must be at least 3 chars and not end in a period.
+          subjectPattern: ^.{3,}[^.]$
+          subjectPatternError: |
+            The subject "{subject}" found in PR title "{title}" doesn't match the required format.
+            Subject must be at least 3 characters and not end with a period.
+            Examples:
+              feat(tools): add find_comparable_properties + Pydantic models
+              fix(config): make ANTHROPIC_API_KEY validation lazy
+              refactor: layer CLI out of agent.py
+              ci: enforce conventional commit titles on PRs

@@ -51,3 +51,35 @@ Stretch (post-v1, only if time): MCP server packaging of the tools so other agen
 ## Stack
 
 Python 3.13 · Anthropic Python SDK · Claude Sonnet 4.6 (agent) + Claude Haiku 4.5 (classification) · pgvector on Postgres · `httpx` + `BeautifulSoup` · Streamlit · pytest · structured JSON logs.
+
+## Commit conventions
+
+PR titles must follow [Conventional Commits](https://www.conventionalcommits.org/) — enforced in CI by `.github/workflows/pr-title.yml`. Since `main` is squash-merged, the PR title becomes the commit message on `main`, so this gives the project a machine-readable history without forcing every PR-branch commit to comply.
+
+**Format:** `<type>(<optional scope>): <subject>`
+
+| Type | When |
+|---|---|
+| `feat` | New functionality (new tool, new memo section) |
+| `fix` | Bug fix |
+| `refactor` | Restructure without behaviour change |
+| `docs` | README, comments, prompt files |
+| `test` | Test-only changes |
+| `chore` | Housekeeping, deps |
+| `ci` | CI / workflow config |
+| `build` | `pyproject.toml`, `uv.lock`, build system |
+| `revert` | Revert a previous commit |
+
+Scopes are optional and free-form (`feat(tools): ...`, `feat(prompts): ...`). Subject lines: imperative mood, no trailing period.
+
+**Examples**
+
+```
+feat(tools): add find_comparable_properties + Pydantic models
+fix(config): make ANTHROPIC_API_KEY validation lazy
+refactor: layer CLI out of agent.py and type the tool registry
+ci: enforce conventional commit titles on PRs
+build(deps): bump anthropic to 0.101.0
+```
+
+Breaking changes use `!` after the type/scope (`feat(api)!: ...`) or a `BREAKING CHANGE:` footer in the body.
