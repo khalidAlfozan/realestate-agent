@@ -1221,6 +1221,7 @@ dependencies = [
     { name = "httpx" },
     { name = "pgvector" },
     { name = "psycopg", extra = ["binary"] },
+    { name = "pydantic" },
     { name = "python-dotenv" },
     { name = "voyageai" },
 ]
@@ -1240,6 +1241,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "pgvector", specifier = ">=0.4.2" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.4" },
+    { name = "pydantic", specifier = ">=2.13.4" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "voyageai", specifier = ">=0.3.7" },
 ]
