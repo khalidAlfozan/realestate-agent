@@ -1,0 +1,48 @@
+name: codeql
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Weekly run catches newly-published vulnerability rules even when the
+  # code hasn't changed. Off-peak Monday morning (UTC).
+  schedule:
+    - cron: "17 3 * * 1"
+
+# Concurrency by ref so re-pushes to a PR don't queue old runs.
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+  # Required so CodeQL can write results to the repo's Security tab.
+  security-events: write
+
+jobs:
+  analyze:
+    # Job name appears as the check name in the merge box.
+    name: analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Initialise CodeQL (Python)
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+          # security-extended adds higher-noise security queries on top of the
+          # default set. Worth it for a portfolio repo where the Security tab
+          # is part of the signal. Switch to security-and-quality to also pull
+          # in maintainability rules (often noisier).
+          queries: security-extended
+          # Python is interpreted so CodeQL doesn't need a build step. The
+          # `none` build mode skips it explicitly and is faster.
+          build-mode: none
+
+      - name: Run CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:python"
