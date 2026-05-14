@@ -12,7 +12,7 @@ import sys
 import anthropic
 
 from src.agent import run_agent
-from src.config import ANTHROPIC_API_KEY
+from src.config import require_anthropic_api_key
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -27,7 +27,7 @@ def main(argv: list[str] | None = None) -> int:
         stream=sys.stderr,
     )
 
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    client = anthropic.Anthropic(api_key=require_anthropic_api_key())
     url = args[0]
     memo = run_agent(
         client, f"Analyse this Warsaw property as a long-term rental investment: {url}"
