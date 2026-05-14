@@ -50,9 +50,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Tests legitimately use `assert` (S101), may use unused-arg fixtures (ARG002),
-# and have access to private symbols on purpose (the `_PhotoAnalysisLLM` import).
-"tests/**" = ["S101", "ARG002"]
+# Tests legitimately use `assert` (S101), may have unused mock-fn / fixture
+# args (ARG001/ARG002/ARG005), and access private symbols on purpose
+# (the `_PhotoAnalysisLLM` import).
+"tests/**" = ["S101", "ARG001", "ARG002", "ARG005"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
@@ -81,10 +82,10 @@ omit = [
 ]
 
 [tool.coverage.report]
-# Below this and CI fails. Current measured is ~78% line / ~75% with branch
-# coverage; threshold leaves modest headroom while ratcheting up over time as
-# agent.py / cli.py get tests.
-fail_under = 70
+# Below this and CI fails. Now that agent.py / cli.py are covered, the
+# measured floor is ~95% (line + branch). Threshold ratcheted to 90 — leaves
+# 5pp of headroom for the inevitable error-path corner cases.
+fail_under = 90
 show_missing = true
 skip_covered = false
 exclude_lines = [
