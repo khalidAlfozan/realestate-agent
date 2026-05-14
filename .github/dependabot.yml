@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Python dependencies — uv ecosystem updates both pyproject.toml and uv.lock.
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      python-deps:
+        patterns: ["*"]
+    open-pull-requests-limit: 5
+
+  # GitHub Actions workflow versions.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday

@@ -1,0 +1,41 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel a previous in-progress run when a new push lands on the same ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up uv (with cache)
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: "3.13"
+
+      - name: Install dependencies (frozen)
+        # --frozen errors out if pyproject.toml drifted from uv.lock —
+        # forces dependency updates to go through Dependabot, not ad-hoc edits.
+        run: uv sync --frozen
+
+      - name: Lint (ruff check)
+        run: uv run ruff check src tests
+
+      - name: Format check (ruff format --check)
+        run: uv run ruff format --check src tests
+
+      - name: Type check (pyright)
+        run: uv run pyright
+
+      - name: Tests (pytest)
+        run: uv run pytest -q

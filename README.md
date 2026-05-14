@@ -1,5 +1,7 @@
 # realestate-agent
 
+[![ci](https://github.com/khalidAlfozan/realestate-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/khalidAlfozan/realestate-agent/actions/workflows/ci.yml)
+
 A single-user investment-analyst agent for the Warsaw residential rental market. Paste an Otodom listing URL and get back a structured investment memo: yield analysis, comparables, neighbourhood context, photo-based condition assessment, and a buy/walk recommendation with a confidence score — the half-day of analyst work compressed into a few minutes.
 
 ## What it does
