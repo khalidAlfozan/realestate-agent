@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "wola-1959-spoldzielcze-ground-floor",
+    "url": "https://www.otodom.pl/pl/oferta/metro-4-pok-po-gen-remoncie-bliska-wola-centrum-ID4B8mI",
+    "notes": "1959 brick block in Wola, post-renovation, ground floor, spółdzielcze własnościowe ownership form, czynsz 930 PLN. Asking 1.29M PLN at 17,671 PLN/m². The reference case we've iterated on throughout development.",
+    "expected": {
+      "verdict_in": ["Borderline", "Buy"],
+      "gross_yield_pct_min": 5.0,
+      "gross_yield_pct_max": 6.5,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["spółdzielcze", "ground floor", "czynsz"]
+    }
+  }
+]

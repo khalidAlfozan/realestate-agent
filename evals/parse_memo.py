@@ -1,0 +1,127 @@
+"""Extract structured fields from a markdown memo.
+
+The regexes deliberately mirror the system prompt's memo template. If the
+template changes and we silently stop extracting a field, the eval will
+flag it (assertion fails because actual is None) — which is the regression
+behaviour we want.
+
+We extract:
+- §3: Photo-derived condition + how many photos were analysed
+- §4 Rentals: comp count
+- §4 Sales: comp count
+- §5: Gross yield %
+- §6: full body text (for substring assertions)
+- §7: Verdict + Confidence
+"""
+
+from __future__ import annotations
+
+import re
+
+from .models import ParsedMemo
+
+# Header lines have **Field:** prefix; tolerate the colon being absent and
+# whitespace varying.
+_VERDICT_RE = re.compile(
+    r"\*\*Verdict:?\*\*\s*([^\n.]+)",
+    re.IGNORECASE,
+)
+_CONFIDENCE_RE = re.compile(
+    r"\*\*Confidence:?\*\*\s*(Low|Medium|High)",
+    re.IGNORECASE,
+)
+
+# §5 line — "**Gross yield: 5.81%**" or "**Gross yield:** 5.81%" (the agent
+# sometimes formats it both ways).
+_GROSS_YIELD_RE = re.compile(
+    r"\*\*Gross yield:?\*?\*?\s*([\d.,]+)\s*%",
+    re.IGNORECASE,
+)
+
+# §3 condition line — "Photo-derived condition: EXCELLENT (high confidence, 8 photos analysed)"
+# Sometimes wrapped in **bold** by the agent.
+_PHOTO_CONDITION_RE = re.compile(
+    r"Photo-derived condition[*:]+\s*\*?\*?(\w+)",
+    re.IGNORECASE,
+)
+_PHOTOS_ANALYSED_RE = re.compile(
+    r"(\d+)\s+photos?\s+analysed",
+    re.IGNORECASE,
+)
+
+# §4 subsection counts — "Comp set: 37 rentals from..." or "32 sales from...".
+# DOTALL because we cross newlines from the heading to the bullet.
+_RENT_COMP_RE = re.compile(
+    r"#+\s*Rentals.*?(\d+)\s+rentals?",
+    re.IGNORECASE | re.DOTALL,
+)
+_SALE_COMP_RE = re.compile(
+    r"#+\s*Sales.*?(\d+)\s+sales?",
+    re.IGNORECASE | re.DOTALL,
+)
+
+# §6 body — everything between "## 6. Risks" and "## 7." (or end of memo).
+_RISKS_SECTION_RE = re.compile(
+    r"##\s*6\.\s*Risks.*?(?=##\s*7\.|\Z)",
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _to_float(s: str | None) -> float | None:
+    if s is None:
+        return None
+    try:
+        return float(s.replace(",", "."))
+    except ValueError:
+        return None
+
+
+def _to_int(s: str | None) -> int | None:
+    if s is None:
+        return None
+    try:
+        return int(s)
+    except ValueError:
+        return None
+
+
+def _normalise_verdict(raw: str | None) -> str | None:
+    """Pick the first canonical verdict word from a free-text verdict line.
+
+    The agent sometimes writes 'Borderline — Buy with conditions' or
+    'Walk for leveraged buyers' — we want just 'Borderline' / 'Walk'.
+    """
+    if raw is None:
+        return None
+    cleaned = raw.strip().rstrip(".:")
+    # Strip surrounding ** if the line was fully bolded.
+    cleaned = cleaned.strip("*").strip()
+    for canonical in ("Borderline", "Walk", "Buy"):
+        if canonical.lower() in cleaned.lower():
+            return canonical
+    return cleaned or None
+
+
+def parse_memo(memo: str) -> ParsedMemo:
+    verdict = _normalise_verdict(_first_match(_VERDICT_RE, memo))
+    confidence_raw = _first_match(_CONFIDENCE_RE, memo)
+    confidence = confidence_raw.title() if confidence_raw else None
+
+    risks_match = _RISKS_SECTION_RE.search(memo)
+    risks_text = risks_match.group(0) if risks_match else ""
+
+    return ParsedMemo(
+        verdict=verdict,
+        confidence=confidence,
+        gross_yield_pct=_to_float(_first_match(_GROSS_YIELD_RE, memo)),
+        photo_condition=(_first_match(_PHOTO_CONDITION_RE, memo) or None),
+        photos_analysed=_to_int(_first_match(_PHOTOS_ANALYSED_RE, memo)),
+        rent_comp_count=_to_int(_first_match(_RENT_COMP_RE, memo)),
+        sale_comp_count=_to_int(_first_match(_SALE_COMP_RE, memo)),
+        risks_text=risks_text,
+    )
+
+
+def _first_match(pattern: re.Pattern[str], text: str) -> str | None:
+    m = pattern.search(text)
+    return m.group(1) if m else None
