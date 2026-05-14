@@ -37,5 +37,13 @@ jobs:
       - name: Type check (pyright)
         run: uv run pyright
 
-      - name: Tests (pytest)
+      - name: Dependency hygiene (deptry)
+        # Catches unused / missing / transitively-imported dependencies.
+        # Pre-installed RAG deps (pgvector, psycopg, voyageai) are
+        # explicitly allowlisted in pyproject.toml [tool.deptry].
+        run: uv run deptry .
+
+      - name: Tests + coverage (pytest)
+        # pytest config in pyproject.toml adds --cov flags and enforces
+        # the fail_under threshold from [tool.coverage.report].
         run: uv run pytest -q

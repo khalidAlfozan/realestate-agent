@@ -52,6 +52,20 @@ Stretch (post-v1, only if time): MCP server packaging of the tools so other agen
 
 Python 3.13 · Anthropic Python SDK · Claude Sonnet 4.6 (agent) + Claude Haiku 4.5 (classification) · pgvector on Postgres · `httpx` + `BeautifulSoup` · Streamlit · pytest · structured JSON logs.
 
+## Code quality
+
+CI runs the following on every PR — see `.github/workflows/ci.yml`:
+
+| Tool | What it catches |
+|---|---|
+| `ruff check` | Style, imports, complexity (`C90`, max 10), naming (`N`), security (`S` / bandit), pytest patterns (`PT`), unused args (`ARG`), simplifications (`SIM`), modernisation (`UP`) |
+| `ruff format --check` | Formatting drift |
+| `pyright` (basic) | Type errors |
+| `deptry` | Unused / missing / transitive deps |
+| `pytest --cov` | Tests + branch coverage; CI fails if total drops below **70%** |
+
+Ratchet up the coverage threshold over time as `agent.py` and `cli.py` get test coverage.
+
 ## Commit conventions
 
 PR titles must follow [Conventional Commits](https://www.conventionalcommits.org/) — enforced in CI by `.github/workflows/pr-title.yml`. Since `main` is squash-merged, the PR title becomes the commit message on `main`, so this gives the project a machine-readable history without forcing every PR-branch commit to comply.
