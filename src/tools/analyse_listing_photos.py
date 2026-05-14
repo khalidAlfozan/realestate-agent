@@ -15,7 +15,7 @@ from typing import Any, cast
 import anthropic
 from anthropic.types import MessageParam, ToolParam
 
-from src.config import ANTHROPIC_API_KEY
+from src.config import require_anthropic_api_key
 from src.models import PhotoAnalysis, _PhotoAnalysisLLM
 
 # Haiku 4.5 is cheap, fast, and capable enough for vision-based condition
@@ -100,7 +100,7 @@ def analyse_listing_photos(
         raise ValueError("analyse_listing_photos requires at least one image URL")
 
     selected = image_urls[:max_photos]
-    api_client = client or anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+    api_client = client or anthropic.Anthropic(api_key=require_anthropic_api_key())
 
     messages = [{"role": "user", "content": _build_user_content(selected, property_context)}]
     response = api_client.messages.parse(
