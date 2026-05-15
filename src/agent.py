@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Any, cast
 
@@ -185,16 +186,29 @@ def run_agent(
         if response.stop_reason != "tool_use":
             raise RuntimeError(f"Unexpected stop_reason: {response.stop_reason!r}")
 
-        tool_results = []
-        for block in response.content:
-            if block.type == "tool_use":
-                tool_results.append(
-                    {
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": _execute_tool(block.name, block.input),
-                    }
-                )
+        # Execute the iteration's tool calls concurrently. The agent emits
+        # tool_use blocks as a batch (the system prompt asks for parallel
+        # calls); the tools are independent and I/O-bound (HTTP), so a thread
+        # pool turns the batch's wall time from sum-of-tools into slowest-tool.
+        # `_execute_tool` is exception-safe — it returns an error JSON string
+        # rather than raising — so `.result()` never raises here.
+        tool_use_blocks = [b for b in response.content if b.type == "tool_use"]
+        with ThreadPoolExecutor(max_workers=len(tool_use_blocks)) as executor:
+            futures = {
+                block.id: executor.submit(_execute_tool, block.name, block.input)
+                for block in tool_use_blocks
+            }
+        # Preserve the original block order. The API matches results to calls
+        # by tool_use_id so order isn't strictly required, but determinism
+        # keeps transcripts and tests stable.
+        tool_results = [
+            {
+                "type": "tool_result",
+                "tool_use_id": block.id,
+                "content": futures[block.id].result(),
+            }
+            for block in tool_use_blocks
+        ]
         messages.append({"role": "user", "content": tool_results})
 
     raise RuntimeError(f"Agent exceeded max_iterations={max_iterations}")

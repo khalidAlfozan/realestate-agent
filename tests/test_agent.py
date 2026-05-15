@@ -9,6 +9,8 @@ access pattern the loop relies on (`response.content[i].type`,
 from __future__ import annotations
 
 import json
+import threading
+import time
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -68,6 +70,23 @@ def _fake_unexpected_stop_response() -> MagicMock:
     msg = MagicMock()
     msg.stop_reason = "max_tokens"
     msg.content = []
+    msg.usage = _fake_usage()
+    return msg
+
+
+def _fake_multi_tool_use_response(calls: list[tuple[str, str]]) -> MagicMock:
+    """Build a fake tool_use Message with one tool_use block per (name, id)."""
+    blocks = []
+    for name, tool_use_id in calls:
+        block = MagicMock()
+        block.type = "tool_use"
+        block.name = name
+        block.id = tool_use_id
+        block.input = {}
+        blocks.append(block)
+    msg = MagicMock()
+    msg.stop_reason = "tool_use"
+    msg.content = blocks
     msg.usage = _fake_usage()
     return msg
 
@@ -389,3 +408,94 @@ class TestStripMemoPreamble:
     def test_unchanged_when_already_starts_with_marker(self) -> None:
         memo = "# Investment Memo: Clean\n\nBody."
         assert strip_memo_preamble(memo) == memo
+
+
+class TestConcurrentToolExecution:
+    """The agent emits a batch of tool_use blocks in one response; run_agent
+    must execute them concurrently (the tools are independent and I/O-bound)."""
+
+    def test_batch_runs_concurrently_not_sequentially(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Three tools each wait on a shared 3-party barrier. They can only all
+        clear it if executed concurrently — sequential execution would block the
+        first tool until the barrier times out (surfacing as an error JSON in
+        the tool result, which this test asserts does NOT happen)."""
+        barrier = threading.Barrier(3, timeout=5)
+
+        def _make_barrier_tool(label: str) -> Any:
+            def tool(**_: Any) -> dict[str, str]:
+                barrier.wait()  # returns only if all 3 tools run at once
+                return {"label": label}
+
+            return tool
+
+        monkeypatch.setattr(
+            "src.agent.FUNCTIONS",
+            {
+                "tool_a": _make_barrier_tool("a"),
+                "tool_b": _make_barrier_tool("b"),
+                "tool_c": _make_barrier_tool("c"),
+            },
+        )
+
+        responses = [
+            _fake_multi_tool_use_response(
+                [("tool_a", "toolu_a"), ("tool_b", "toolu_b"), ("tool_c", "toolu_c")]
+            ),
+            _fake_text_response("Done."),
+        ]
+        snapshots: list[list[dict[str, Any]]] = []
+
+        def side_effect(**kwargs: Any) -> MagicMock:
+            last = kwargs["messages"][-1]
+            snapshots.append(list(last["content"]) if isinstance(last["content"], list) else [])
+            return responses.pop(0)
+
+        client = MagicMock()
+        client.messages.create.side_effect = side_effect
+
+        result = run_agent(client, "Analyse")
+
+        assert result.memo == "Done."
+        # snapshots[1] is the bundled tool_result batch. If the barrier had
+        # timed out (sequential execution), each result would be an error JSON.
+        batch = snapshots[1]
+        assert len(batch) == 3
+        for block in batch:
+            assert "error" not in block["content"]
+            assert '"label"' in block["content"]
+
+    def test_tool_results_preserve_block_order(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Even when a later tool finishes first, tool_results stay in the
+        original tool_use block order — deterministic transcripts."""
+
+        def slow_tool(**_: Any) -> dict[str, str]:
+            time.sleep(0.1)
+            return {"speed": "slow"}
+
+        def fast_tool(**_: Any) -> dict[str, str]:
+            return {"speed": "fast"}
+
+        monkeypatch.setattr("src.agent.FUNCTIONS", {"slow_tool": slow_tool, "fast_tool": fast_tool})
+
+        responses = [
+            # slow block first, fast block second — fast will finish first.
+            _fake_multi_tool_use_response(
+                [("slow_tool", "toolu_slow"), ("fast_tool", "toolu_fast")]
+            ),
+            _fake_text_response("Done."),
+        ]
+        snapshots: list[list[dict[str, Any]]] = []
+
+        def side_effect(**kwargs: Any) -> MagicMock:
+            last = kwargs["messages"][-1]
+            snapshots.append(list(last["content"]) if isinstance(last["content"], list) else [])
+            return responses.pop(0)
+
+        client = MagicMock()
+        client.messages.create.side_effect = side_effect
+
+        run_agent(client, "Analyse")
+
+        assert [block["tool_use_id"] for block in snapshots[1]] == ["toolu_slow", "toolu_fast"]

@@ -47,7 +47,7 @@ if run_clicked:
         st.error(str(exc))
         st.stop()
 
-    with st.spinner("Analysing — the agent runs ~7 tools, this usually takes 30-60s..."):
+    with st.spinner("Analysing — the agent runs ~7 tools; this typically takes 1-3 minutes..."):
         try:
             result = run_agent(client, build_analysis_request(url))
         except Exception as exc:
