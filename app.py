@@ -21,7 +21,7 @@ st.set_page_config(page_title="Warsaw Rental Investment Analyst", layout="center
 
 st.title("Warsaw Rental Investment Analyst")
 st.caption(
-    "Paste an Otodom listing URL. An AI agent (Claude + 7 tools) fetches the "
+    "Paste an Otodom listing URL. An AI agent fetches the "
     "listing, pulls rent/sale comparables, district market stats, GUS "
     "demographics and nearby amenities, reviews the photos, and writes a "
     "structured long-term-rental investment memo."
