@@ -9,9 +9,14 @@ concurrency:
   group: pr-title-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
+# Least privilege: the action only needs to read the PR's title.
+permissions:
+  pull-requests: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Validate PR title against Conventional Commits
         # main is squash-merged with linear history → the PR title becomes

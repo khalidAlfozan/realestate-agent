@@ -21,6 +21,7 @@ don't change.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from http import HTTPStatus
 from typing import Any
 
 import httpx
@@ -117,7 +118,7 @@ def _fetch_latest_value(unit_id: str, var_id: int, api_key: str) -> tuple[float 
         headers={"X-ClientId": api_key},
         timeout=settings.gus_bdl.request_timeout_s,
     )
-    if response.status_code == 404:
+    if response.status_code == HTTPStatus.NOT_FOUND:
         return None, None
     response.raise_for_status()
     payload: dict[str, Any] = response.json()

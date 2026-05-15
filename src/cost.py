@@ -29,7 +29,7 @@ multiplication at call sites).
 from __future__ import annotations
 
 import logging
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Protocol
 
 log = logging.getLogger(__name__)
@@ -84,7 +84,7 @@ def _check_staleness(today: date | None = None) -> int:
     Returns the snapshot age in days (for tests). Pure function — `today`
     is injectable so tests can simulate "in 7 months from now".
     """
-    today = today or date.today()
+    today = today or datetime.now(UTC).date()
     age_days = (today - PRICING_SNAPSHOT_DATE).days
     if age_days > STALENESS_WARN_AFTER_DAYS:
         log.warning(

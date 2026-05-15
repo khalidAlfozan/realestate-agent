@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from unittest.mock import MagicMock
 
 import pytest
@@ -144,7 +144,7 @@ class TestStaleness:
     def test_snapshot_date_is_a_real_date(self) -> None:
         """Sanity-check: the constant is an actual date, not None / not in the future."""
         assert isinstance(PRICING_SNAPSHOT_DATE, date)
-        assert date.today() >= PRICING_SNAPSHOT_DATE
+        assert datetime.now(UTC).date() >= PRICING_SNAPSHOT_DATE
 
 
 class TestUnknownModelWarning:

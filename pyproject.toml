@@ -31,30 +31,46 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = [
-    "E",    # pycodestyle errors
-    "F",    # pyflakes
-    "W",    # pycodestyle warnings
-    "I",    # isort (import order)
-    "B",    # flake8-bugbear
-    "UP",   # pyupgrade
-    "SIM",  # flake8-simplify
-    "RUF",  # ruff-native rules
-    "C90",  # mccabe — cyclomatic complexity ceiling (default max 10)
-    "N",    # pep8-naming
-    "S",    # flake8-bandit (security)
-    "PT",   # flake8-pytest-style
-    "RET",  # flake8-return (no unnecessary else after return, etc.)
-    "ARG",  # flake8-unused-arguments
+    "E",       # pycodestyle errors
+    "F",       # pyflakes
+    "W",       # pycodestyle warnings
+    "I",       # isort (import order)
+    "B",       # flake8-bugbear
+    "UP",      # pyupgrade
+    "SIM",     # flake8-simplify
+    "RUF",     # ruff-native rules
+    "C90",     # mccabe — cyclomatic complexity ceiling (default max 10)
+    "N",       # pep8-naming
+    "S",       # flake8-bandit (security)
+    "PT",      # flake8-pytest-style
+    "RET",     # flake8-return (no unnecessary else after return, etc.)
+    "ARG",     # flake8-unused-arguments
+    "C4",      # flake8-comprehensions — simpler / faster comprehensions
+    "DTZ",     # flake8-datetimez — naive datetimes are a silent-bug magnet
+    "A",       # flake8-builtins — don't shadow `id`, `type`, `list`, etc.
+    "LOG",     # flake8-logging — logging-call correctness
+    "G",       # flake8-logging-format — lazy %-args in log calls, not f-strings
+    "PIE",     # flake8-pie — misc anti-patterns (dup keys, needless dicts, ...)
+    "ISC",     # flake8-implicit-str-concat
+    "RSE",     # flake8-raise — no needless parens on raise
+    "FLY",     # flynt — static str joins should be f-strings
+    "PTH",     # flake8-use-pathlib — pathlib over os.path
+    "ERA",     # eradicate — flag commented-out code (a form of dead code)
+    "PGH",     # pygrep-hooks — no blanket `# noqa` / `# type: ignore`
+    "PLR2004", # pylint — magic value used in comparison
 ]
 ignore = [
-    "E501",  # line-too-long: ruff formatter handles long strings; we don't need to be strict
+    "E501",    # line-too-long: ruff formatter handles long strings
+    "ISC001",  # single-line implicit str concat: conflicts with the formatter
 ]
 
 [tool.ruff.lint.per-file-ignores]
 # Tests legitimately use `assert` (S101), may have unused mock-fn / fixture
 # args (ARG001/ARG002/ARG005), and access private symbols on purpose
-# (the `_PhotoAnalysisLLM` import).
-"tests/**" = ["S101", "ARG001", "ARG002", "ARG005"]
+# (the `_PhotoAnalysisLLM` import). PLR2004 is silenced because a test's
+# whole job is comparing against literal expected values — naming every
+# `2024` or `145000` as a constant would hurt readability, not help it.
+"tests/**" = ["S101", "ARG001", "ARG002", "ARG005", "PLR2004"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10
@@ -64,7 +80,7 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.pyright]
-include = ["src", "tests"]
+include = ["src", "tests", "evals"]
 pythonVersion = "3.13"
 typeCheckingMode = "basic"
 reportMissingImports = "error"
