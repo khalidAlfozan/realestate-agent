@@ -47,13 +47,23 @@ if run_clicked:
         st.error(str(exc))
         st.stop()
 
-    with st.spinner("Analysing — the agent runs ~7 tools; this typically takes 1-3 minutes..."):
+    # A live feed of the agent's steps — a multi-minute run should never be a
+    # blank spinner. run_agent calls on_progress on this (the script) thread,
+    # so writing into the status container from the callback is safe.
+    with st.status("Analysing the listing...", expanded=True) as status:
+
+        def _report(message: str) -> None:
+            status.write(message)
+
+        status.write("This typically takes 3-4 minutes — progress below.")
         try:
-            result = run_agent(client, build_analysis_request(url))
+            result = run_agent(client, build_analysis_request(url), on_progress=_report)
         except Exception as exc:
             # A UI boundary must never surface a raw traceback to the user.
+            status.update(label="Analysis failed", state="error")
             st.error(f"The analysis failed — {type(exc).__name__}: {exc}")
             st.stop()
+        status.update(label="Analysis complete", state="complete", expanded=False)
 
     # Persist across re-runs (e.g. when the download button re-runs the script),
     # so the agent is never accidentally re-invoked for the same click.

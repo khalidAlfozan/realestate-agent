@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from typing import Any, cast
@@ -68,6 +69,17 @@ def strip_memo_preamble(memo: str) -> str:
     return memo
 
 
+def _format_tool_names(names: list[str]) -> str:
+    """Render a tool-call batch for a progress line, collapsing repeats:
+    `['find_comparable_properties', 'find_comparable_properties', 'x']`
+    → `'find_comparable_properties (x2), x'`. Insertion order is preserved.
+    """
+    counts: dict[str, int] = {}
+    for name in names:
+        counts[name] = counts.get(name, 0) + 1
+    return ", ".join(name if c == 1 else f"{name} (x{c})" for name, c in counts.items())
+
+
 def _execute_tool(name: str, arguments: dict[str, Any]) -> str:
     fn = FUNCTIONS.get(name)
     if fn is None:
@@ -106,13 +118,20 @@ def run_agent(
     user_message: str,
     *,
     max_iterations: int = 10,
+    on_progress: Callable[[str], None] | None = None,
 ) -> RunResult:
     """Drive the agent loop until end_turn; return the memo + run metrics.
 
-    The Anthropic client is injected so callers (CLI, eval harness, future
-    Streamlit UI) can swap in recording / mocking clients without touching
-    the loop. Per-iteration metrics are logged at INFO; the full RunResult
-    is returned for callers that want to display / persist them.
+    The Anthropic client is injected so callers (CLI, eval harness, Streamlit
+    UI) can swap in recording / mocking clients without touching the loop.
+    Per-iteration metrics are logged at INFO; the full RunResult is returned
+    for callers that want to display / persist them.
+
+    `on_progress`, if given, is called with a short human-readable string at
+    each step — before every model call ("Claude is thinking...") and before
+    each tool batch ("Running: ..."). The Streamlit UI renders these as a live
+    feed so a multi-minute run isn't a blank spinner. It runs on the calling
+    thread (not the tool worker threads), so a UI callback can touch UI state.
     """
     messages: list[dict[str, Any]] = [{"role": "user", "content": user_message}]
 
@@ -127,6 +146,9 @@ def run_agent(
     iteration = 0
 
     for iteration in range(max_iterations):
+        if on_progress is not None:
+            on_progress(f"Claude is thinking (step {iteration + 1})...")
+
         # cache_control on the last system block caches tools+system together
         # (tools render before system in the request). Stable prefix → cache
         # hits on every iteration after the first.
@@ -193,6 +215,8 @@ def run_agent(
         # `_execute_tool` is exception-safe — it returns an error JSON string
         # rather than raising — so `.result()` never raises here.
         tool_use_blocks = [b for b in response.content if b.type == "tool_use"]
+        if on_progress is not None:
+            on_progress(f"Running: {_format_tool_names([b.name for b in tool_use_blocks])}")
         with ThreadPoolExecutor(max_workers=len(tool_use_blocks)) as executor:
             futures = {
                 block.id: executor.submit(_execute_tool, block.name, block.input)
