@@ -165,7 +165,7 @@ class TestRunAgent:
 
         result = run_agent(client, "Analyse this URL")
 
-        assert result == "Final memo."
+        assert result.memo == "Final memo."
         assert client.messages.create.call_count == 1
 
     def test_executes_tool_then_returns_final_text(self, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -211,7 +211,7 @@ class TestRunAgent:
 
         result = run_agent(client, "Analyse this URL")
 
-        assert result == "# Investment Memo: ..."
+        assert result.memo == "# Investment Memo: ..."
         assert client.messages.create.call_count == 2
 
         # First call: just the initial user message
@@ -267,7 +267,7 @@ class TestRunAgent:
 
         result = run_agent(client, "Analyse")
 
-        assert result == "Done."
+        assert result.memo == "Done."
         # Second call's last user message should have BOTH tool_results bundled.
         ids = {block["tool_use_id"] for block in snapshots[1]}
         assert ids == {"toolu_a", "toolu_b"}
@@ -300,6 +300,50 @@ class TestRunAgent:
         # Should have made exactly max_iterations calls before bailing.
         assert client.messages.create.call_count == 3
 
+    def test_run_result_accumulates_metrics_across_iterations(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The RunResult must sum tokens / tool_calls / cost across all iterations,
+        not just report the final one."""
+
+        def fake_tool(**_: Any) -> dict[str, str]:
+            return {"data": "x"}
+
+        monkeypatch.setattr("src.agent.FUNCTIONS", {"t": fake_tool})
+
+        # Build two responses with distinct token counts so we can verify summing.
+        first = _fake_tool_use_response("t", {})
+        first.usage.input_tokens = 100
+        first.usage.output_tokens = 50
+        # Two tool_use blocks in the first response → 2 tool calls.
+        block_a = MagicMock(type="tool_use", name="t", id="a", input={})
+        block_a.type = "tool_use"
+        block_a.name = "t"
+        block_a.id = "a"
+        block_a.input = {}
+        block_b = MagicMock()
+        block_b.type = "tool_use"
+        block_b.name = "t"
+        block_b.id = "b"
+        block_b.input = {}
+        first.content = [block_a, block_b]
+
+        second = _fake_text_response("done")
+        second.usage.input_tokens = 200
+        second.usage.output_tokens = 75
+
+        client = MagicMock()
+        client.messages.create.side_effect = [first, second]
+
+        result = run_agent(client, "Analyse")
+
+        assert result.iterations == 2
+        assert result.tool_calls == 2  # only first iteration had tool_use blocks
+        assert result.input_tokens == 300  # 100 + 200
+        assert result.output_tokens == 125  # 50 + 75
+        assert result.cost_usd > 0  # some real cost computed against Sonnet pricing
+        assert result.elapsed_s >= 0
+
     def test_empty_text_block_returns_empty_string(self) -> None:
         """Defensive: end_turn with no text block should return empty string,
         not raise."""
@@ -312,4 +356,4 @@ class TestRunAgent:
 
         result = run_agent(client, "Analyse")
 
-        assert result == ""
+        assert result.memo == ""

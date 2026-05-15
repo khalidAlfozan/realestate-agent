@@ -44,7 +44,8 @@ def run_eval_case(
             return cached, True
 
     user_message = f"Analyse this Warsaw property as a long-term rental investment: {case.url}"
-    memo = run_agent(client, user_message)
+    result = run_agent(client, user_message)
+    memo = result.memo
     # Belt-and-suspenders preamble strip (mirrors src.cli's behaviour).
     marker = settings.memo_preamble_marker
     if marker in memo:

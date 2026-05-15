@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import logging
+import time
+from dataclasses import dataclass
 from typing import Any, cast
 
 import anthropic
@@ -11,11 +13,33 @@ from anthropic.types import MessageParam
 from pydantic import BaseModel
 
 from src.config import PROMPTS, settings
+from src.cost import compute_cost_usd
 from src.tools import FUNCTIONS, SCHEMAS
 
 SYSTEM_PROMPT = (PROMPTS / "system.md").read_text()
 
 log = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class RunResult:
+    """The full result of a single `run_agent` invocation.
+
+    `memo` is the agent's final text. The other fields are the metrics the
+    CLI / eval harness / future dashboards care about. Returning a typed
+    object instead of a bare string makes observability a first-class
+    concern of the API rather than a side-channel via logs.
+    """
+
+    memo: str
+    iterations: int
+    tool_calls: int
+    input_tokens: int
+    output_tokens: int
+    cache_read_tokens: int
+    cache_write_tokens: int
+    cost_usd: float
+    elapsed_s: float
 
 
 def _execute_tool(name: str, arguments: dict[str, Any]) -> str:
@@ -31,16 +55,23 @@ def _execute_tool(name: str, arguments: dict[str, Any]) -> str:
         return json.dumps({"error": f"{type(exc).__name__}: {exc}"})
 
 
-def _log_iteration(iteration: int, response: anthropic.types.Message) -> None:
+def _log_iteration(
+    iteration: int,
+    response: anthropic.types.Message,
+    tool_calls_this_iter: int,
+    cost_usd: float,
+) -> None:
     usage = response.usage
     log.info(
-        "iter=%d stop=%s in=%d out=%d cache_read=%d cache_write=%d",
+        "iter=%d stop=%s in=%d out=%d cache_read=%d cache_write=%d tools=%d cost_usd=%.4f",
         iteration,
         response.stop_reason,
         usage.input_tokens,
         usage.output_tokens,
         getattr(usage, "cache_read_input_tokens", 0),
         getattr(usage, "cache_creation_input_tokens", 0),
+        tool_calls_this_iter,
+        cost_usd,
     )
 
 
@@ -49,14 +80,25 @@ def run_agent(
     user_message: str,
     *,
     max_iterations: int = 10,
-) -> str:
-    """Drive the agent loop until end_turn; return the final assistant text.
+) -> RunResult:
+    """Drive the agent loop until end_turn; return the memo + run metrics.
 
     The Anthropic client is injected so callers (CLI, eval harness, future
     Streamlit UI) can swap in recording / mocking clients without touching
-    the loop.
+    the loop. Per-iteration metrics are logged at INFO; the full RunResult
+    is returned for callers that want to display / persist them.
     """
     messages: list[dict[str, Any]] = [{"role": "user", "content": user_message}]
+
+    started = time.monotonic()
+    total_input = 0
+    total_output = 0
+    total_cache_read = 0
+    total_cache_write = 0
+    total_cost = 0.0
+    total_tool_calls = 0
+    final_text = ""
+    iteration = 0
 
     for iteration in range(max_iterations):
         # cache_control on the last system block caches tools+system together
@@ -77,14 +119,42 @@ def run_agent(
             tools=SCHEMAS,
             messages=cast(list[MessageParam], messages),
         )
-        _log_iteration(iteration, response)
+
+        # Count tool_use blocks in this response (= API calls the agent
+        # asked us to make on its behalf this iteration).
+        tool_calls_this_iter = sum(1 for b in response.content if b.type == "tool_use")
+
+        # Per-iteration cost. Settings.agent.model is the model we billed at.
+        iter_cost = compute_cost_usd(settings.agent.model, response.usage)
+
+        _log_iteration(iteration, response, tool_calls_this_iter, iter_cost)
+
+        # Accumulate run-level totals.
+        usage = response.usage
+        total_input += usage.input_tokens
+        total_output += usage.output_tokens
+        total_cache_read += getattr(usage, "cache_read_input_tokens", 0) or 0
+        total_cache_write += getattr(usage, "cache_creation_input_tokens", 0) or 0
+        total_cost += iter_cost
+        total_tool_calls += tool_calls_this_iter
 
         messages.append({"role": "assistant", "content": response.content})
 
         if response.stop_reason == "end_turn":
-            return next(
+            final_text = next(
                 (block.text for block in response.content if block.type == "text"),
                 "",
+            )
+            return RunResult(
+                memo=final_text,
+                iterations=iteration + 1,
+                tool_calls=total_tool_calls,
+                input_tokens=total_input,
+                output_tokens=total_output,
+                cache_read_tokens=total_cache_read,
+                cache_write_tokens=total_cache_write,
+                cost_usd=total_cost,
+                elapsed_s=time.monotonic() - started,
             )
 
         if response.stop_reason != "tool_use":
