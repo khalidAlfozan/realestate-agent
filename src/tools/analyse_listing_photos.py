@@ -26,23 +26,8 @@ import anthropic
 import httpx
 from anthropic.types import MessageParam, ToolParam
 
-from src.config import require_anthropic_api_key
+from src.config import require_anthropic_api_key, settings
 from src.models import PhotoAnalysis, _PhotoAnalysisLLM
-
-# Haiku 4.5 is cheap, fast, and capable enough for vision-based condition
-# classification. Sonnet would be overkill here.
-MODEL_VISION = "claude-haiku-4-5"
-MAX_TOKENS_VISION = 1024
-DEFAULT_MAX_PHOTOS = 20
-IMAGE_FETCH_TIMEOUT_S = 15.0
-
-# Mimic a real browser when fetching images from Otodom's CDN. The CDN
-# accepts requests without a User-Agent in our testing, but using one
-# matches what the listing-page scraper sends and is the safer default.
-USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-)
 
 # Anthropic accepts these image media types for vision input.
 _ALLOWED_MEDIA_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
@@ -84,11 +69,11 @@ SCHEMA: ToolParam = {
                 "type": "integer",
                 "description": (
                     "Cap on how many photos to send to the vision model. "
-                    f"Default {DEFAULT_MAX_PHOTOS}. Higher costs more."
+                    f"Default {settings.vision.default_max_photos}. Higher costs more."
                 ),
                 "minimum": 1,
                 "maximum": 20,
-                "default": DEFAULT_MAX_PHOTOS,
+                "default": settings.vision.default_max_photos,
             },
         },
         "required": ["image_urls"],
@@ -106,9 +91,9 @@ def _fetch_image(url: str) -> tuple[str, bytes] | None:
     try:
         response = httpx.get(
             url,
-            headers={"User-Agent": USER_AGENT, "Accept": "image/*"},
+            headers={"User-Agent": settings.scraping.user_agent, "Accept": "image/*"},
             follow_redirects=True,
-            timeout=IMAGE_FETCH_TIMEOUT_S,
+            timeout=settings.vision.fetch_timeout_s,
         )
         response.raise_for_status()
     except (httpx.HTTPError, httpx.TimeoutException) as exc:
@@ -159,9 +144,11 @@ def _build_user_content(
 def analyse_listing_photos(
     image_urls: list[str],
     property_context: str = "",
-    max_photos: int = DEFAULT_MAX_PHOTOS,
+    max_photos: int | None = None,
     client: anthropic.Anthropic | None = None,
 ) -> PhotoAnalysis:
+    if max_photos is None:
+        max_photos = settings.vision.default_max_photos
     if not image_urls:
         raise ValueError("analyse_listing_photos requires at least one image URL")
 
@@ -183,8 +170,8 @@ def analyse_listing_photos(
 
     messages = [{"role": "user", "content": _build_user_content(fetched, property_context)}]
     response = api_client.messages.parse(
-        model=MODEL_VISION,
-        max_tokens=MAX_TOKENS_VISION,
+        model=settings.vision.model,
+        max_tokens=settings.vision.max_tokens,
         messages=cast(list[MessageParam], messages),
         output_format=_PhotoAnalysisLLM,
     )
@@ -203,5 +190,5 @@ def analyse_listing_photos(
         observations=parsed.observations,
         red_flags=parsed.red_flags,
         photos_analysed=len(fetched),
-        model_used=MODEL_VISION,
+        model_used=settings.vision.model,
     )

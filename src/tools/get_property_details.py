@@ -9,12 +9,8 @@ import httpx
 from anthropic.types import ToolParam
 from bs4 import BeautifulSoup
 
+from src.config import settings
 from src.models import Address, Coordinates, PropertyDetails
-
-USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-)
 
 SCHEMA: ToolParam = {
     "name": "get_property_details",
@@ -95,12 +91,12 @@ def get_property_details(url: str) -> PropertyDetails:
     response = httpx.get(
         url,
         headers={
-            "User-Agent": USER_AGENT,
+            "User-Agent": settings.scraping.user_agent,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9,pl;q=0.8",
         },
         follow_redirects=True,
-        timeout=15.0,
+        timeout=settings.scraping.request_timeout_s,
     )
     response.raise_for_status()
 

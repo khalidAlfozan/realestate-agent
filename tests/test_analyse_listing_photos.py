@@ -19,9 +19,9 @@ import httpx
 import pytest
 from pytest_httpx import HTTPXMock
 
+from src.config import settings
 from src.models import _PhotoAnalysisLLM
 from src.tools.analyse_listing_photos import (
-    DEFAULT_MAX_PHOTOS,
     _build_user_content,
     analyse_listing_photos,
 )
@@ -99,7 +99,7 @@ def test_uses_default_max_when_unspecified(httpx_mock: HTTPXMock) -> None:
 
     result = analyse_listing_photos(image_urls=urls, client=client)
 
-    assert result.photos_analysed == DEFAULT_MAX_PHOTOS
+    assert result.photos_analysed == settings.vision.default_max_photos
 
 
 def test_passes_property_context_into_instruction(httpx_mock: HTTPXMock) -> None:

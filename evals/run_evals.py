@@ -22,10 +22,9 @@ from evals import cache as memo_cache
 from evals.models import EvalCase, EvalCheck, EvalResult, Expected, ParsedMemo
 from evals.parse_memo import parse_memo
 from src.agent import SYSTEM_PROMPT, run_agent
-from src.config import require_anthropic_api_key
+from src.config import require_anthropic_api_key, settings
 
 CASES_FILE = Path(__file__).resolve().parent / "cases.json"
-MEMO_PREAMBLE_MARKER = "# Investment Memo:"
 
 
 def load_cases() -> list[EvalCase]:
@@ -47,8 +46,9 @@ def run_eval_case(
     user_message = f"Analyse this Warsaw property as a long-term rental investment: {case.url}"
     memo = run_agent(client, user_message)
     # Belt-and-suspenders preamble strip (mirrors src.cli's behaviour).
-    if MEMO_PREAMBLE_MARKER in memo:
-        memo = memo[memo.index(MEMO_PREAMBLE_MARKER) :]
+    marker = settings.memo_preamble_marker
+    if marker in memo:
+        memo = memo[memo.index(marker) :]
     memo_cache.save(case.id, SYSTEM_PROMPT, memo)
     return memo, False
 
