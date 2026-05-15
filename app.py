@@ -26,7 +26,6 @@ st.caption(
     "demographics and nearby amenities, reviews the photos, and writes a "
     "structured long-term-rental investment memo."
 )
-st.caption("Powered by Claude Sonnet 4.6.")
 
 url = st.text_input(
     "Otodom listing URL",
