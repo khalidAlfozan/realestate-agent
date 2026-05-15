@@ -102,13 +102,17 @@ def test_fetch_latest_handles_404(httpx_mock: HTTPXMock) -> None:
 def test_returns_full_demographics_on_happy_path(
     httpx_mock: HTTPXMock, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Three GETs (population, dwellings, net migration) → one DistrictDemographics.
-    Year comes back from the live API as a STRING ('2024'), not int — fixture
-    mirrors that to keep the test honest."""
+    """Six GETs (population, dwellings, net migration, area, new-dwellings rate,
+    businesses rate) → one DistrictDemographics. Year comes back from the live
+    API as a STRING ('2024'), not int — fixture mirrors that to keep the test
+    honest."""
     monkeypatch.setenv("GUS_BDL_API_KEY", "fake-key-for-test")
     httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 145000, "attrId": 1}]))
     httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 109194, "attrId": 1}]))
     httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 408, "attrId": 1}]))
+    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 19, "attrId": 1}]))
+    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 9.2, "attrId": 1}]))
+    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 409, "attrId": 1}]))
 
     result = get_district_demographics("Wola")
 
@@ -120,6 +124,12 @@ def test_returns_full_demographics_on_happy_path(
     assert result.dwellings_year == 2024
     assert result.net_migration == 408
     assert result.net_migration_year == 2024
+    assert result.area_km2 == 19.0
+    assert result.area_km2_year == 2024
+    assert result.new_dwellings_per_1000_residents == 9.2
+    assert result.new_dwellings_per_1000_residents_year == 2024
+    assert result.businesses_per_1000_residents == 409.0
+    assert result.businesses_per_1000_residents_year == 2024
 
     parsed_at = datetime.fromisoformat(result.fetched_at)
     assert parsed_at.utcoffset() is not None
@@ -131,9 +141,8 @@ def test_negative_net_migration_is_preserved(
     """A shrinking dzielnica returns a negative migration balance — sign matters
     for the memo's tenant-pool reasoning, so don't accidentally clamp at zero."""
     monkeypatch.setenv("GUS_BDL_API_KEY", "fake-key-for-test")
-    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 30000, "attrId": 1}]))
-    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 12000, "attrId": 1}]))
-    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": -185, "attrId": 1}]))
+    for val in (30000, 12000, -185, 60, 1.0, 200):
+        httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": val, "attrId": 1}]))
 
     result = get_district_demographics("Rembertów")
     assert result.net_migration == -185
@@ -142,13 +151,16 @@ def test_negative_net_migration_is_preserved(
 def test_partial_data_returns_nones_for_missing_fields(
     httpx_mock: HTTPXMock, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """If BDL has no dwellings data for a particular dzielnica, that field is None
-    and the memo skips it — but the call still succeeds and returns the
-    other variables."""
+    """If BDL has no data for some variables for a particular dzielnica, those
+    fields are None and the memo skips them — but the call still succeeds and
+    returns the other variables. Tests both the empty-results and 404 paths."""
     monkeypatch.setenv("GUS_BDL_API_KEY", "fake-key-for-test")
     httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 50000, "attrId": 1}]))
     httpx_mock.add_response(json={"totalRecords": 0, "page": 0, "pageSize": 100, "results": []})
     httpx_mock.add_response(status_code=404, text="Not Found")
+    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 60, "attrId": 1}]))
+    httpx_mock.add_response(json={"totalRecords": 0, "page": 0, "pageSize": 100, "results": []})
+    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 195, "attrId": 1}]))
 
     result = get_district_demographics("Wesoła")
 
@@ -157,15 +169,19 @@ def test_partial_data_returns_nones_for_missing_fields(
     assert result.dwellings_year is None
     assert result.net_migration is None
     assert result.net_migration_year is None
+    assert result.area_km2 == 60.0
+    assert result.new_dwellings_per_1000_residents is None
+    assert result.businesses_per_1000_residents == 195.0
 
 
 def test_sends_x_clientid_header_on_each_request(
     httpx_mock: HTTPXMock, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Without X-ClientId, BDL applies stricter rate limits — verify we're not
-    accidentally calling unauthenticated."""
+    accidentally calling unauthenticated. Now 6 requests per invocation, all
+    must carry the header."""
     monkeypatch.setenv("GUS_BDL_API_KEY", "verify-this-key")
-    for _ in range(3):
+    for _ in range(6):
         httpx_mock.add_response(
             json=_bdl_response([{"year": 2023, "val": 1.0, "attrId": 0, "attribute": ""}])
         )
@@ -173,7 +189,7 @@ def test_sends_x_clientid_header_on_each_request(
     get_district_demographics("Mokotów")
 
     requests = httpx_mock.get_requests()
-    assert len(requests) == 3
+    assert len(requests) == 6
     for req in requests:
         assert req.headers.get("X-ClientId") == "verify-this-key"
 
