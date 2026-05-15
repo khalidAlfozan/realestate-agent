@@ -20,14 +20,18 @@ import re
 
 from .models import ParsedMemo
 
-# Header lines have **Field:** prefix; tolerate the colon being absent and
-# whitespace varying.
+# Header lines have **Field:** prefix; tolerate two common bold variants:
+#   **Verdict:** Borderline (qualifiers).               <- colon outside bold
+#   **Verdict: Borderline — qualifiers.**               <- whole line bolded
+# The character class [:\s*]+ swallows whatever sits between "Verdict" and
+# the value (any combo of colon, whitespace, asterisks). [^\n*]+ stops the
+# capture at a newline OR the closing ** of the whole-bold variant.
 _VERDICT_RE = re.compile(
-    r"\*\*Verdict:?\*\*\s*([^\n.]+)",
+    r"\*\*Verdict[:\s*]+([^\n*]+)",
     re.IGNORECASE,
 )
 _CONFIDENCE_RE = re.compile(
-    r"\*\*Confidence:?\*\*\s*(Low|Medium|High)",
+    r"\*\*Confidence[:\s*]+(Low|Medium|High)",
     re.IGNORECASE,
 )
 

@@ -137,3 +137,23 @@ class TestParseMemo:
         memo_b = "**Gross yield:** 4.42%"
         assert parse_memo(memo_a).gross_yield_pct == 4.42
         assert parse_memo(memo_b).gross_yield_pct == 4.42
+
+    def test_handles_whole_bold_verdict_with_qualifier(self) -> None:
+        """Real-world variant the agent has produced: the whole 'Verdict: X — ...'
+        line is wrapped in a single bold span, not just the label. Without
+        this tolerance, the parser silently returns None and the eval reports
+        verdict=None (which looks like a regression but is just formatting drift)."""
+        memo = (
+            "## 7. Recommendation\n\n"
+            "**Verdict: Borderline — leaning Buy, subject to legal due diligence.**\n"
+            "**Confidence: Medium.**"
+        )
+        result = parse_memo(memo)
+        assert result.verdict == "Borderline"
+        assert result.confidence == "Medium"
+
+    def test_handles_whole_bold_walk_verdict(self) -> None:
+        memo = "**Verdict: Walk — overpriced for condition.**\n**Confidence: High.**"
+        result = parse_memo(memo)
+        assert result.verdict == "Walk"
+        assert result.confidence == "High"

@@ -2,11 +2,11 @@
   {
     "id": "wola-1959-spoldzielcze-ground-floor",
     "url": "https://www.otodom.pl/pl/oferta/metro-4-pok-po-gen-remoncie-bliska-wola-centrum-ID4B8mI",
-    "notes": "1959 brick block in Wola, post-renovation, ground floor, spółdzielcze własnościowe ownership form, czynsz 930 PLN (12.7 PLN/m² — within the normal 8–15 PLN/m² band, so we DON'T require it in §6 risks; the agent rightly treats it as an expense in §5, not a structural risk). Asking 1.29M PLN at 17,671 PLN/m². The reference case we've iterated on throughout development.",
+    "notes": "1959 brick block in Wola, post-renovation, ground floor, spółdzielcze własnościowe ownership form, czynsz 930 PLN (12.7 PLN/m² — within the normal 8–15 PLN/m² band, so we DON'T require it in §6 risks; the agent rightly treats it as an expense in §5, not a structural risk). Asking 1.29M PLN at 17,671 PLN/m². The reference case we've iterated on throughout development. Yield band 5.0–7.0 covers the full typical Warsaw range — earlier 6.5 ceiling broke on normal rent-comp drift (live Otodom data shifts the chosen rent benchmark by a few PLN/m² between runs).",
     "expected": {
       "verdict_in": ["Borderline", "Buy"],
       "gross_yield_pct_min": 5.0,
-      "gross_yield_pct_max": 6.5,
+      "gross_yield_pct_max": 7.0,
       "photos_analysed_min": 1,
       "rent_comp_count_min": 20,
       "sale_comp_count_min": 20,
