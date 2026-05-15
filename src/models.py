@@ -112,6 +112,34 @@ class ComparablesResult(_Frozen):
     p75_pln_per_m2: int | None = None
 
 
+class DistrictMarketSide(_Frozen):
+    """Stats for one side (rent or sale) of a district market snapshot."""
+
+    search_url: str
+    sample_count: int
+    total_listings_in_district: int | None = None
+    median_pln_per_m2: int | None = None
+    p25_pln_per_m2: int | None = None
+    p75_pln_per_m2: int | None = None
+
+
+class DistrictMarketStats(_Frozen):
+    """Result of `get_district_market_stats` — district-wide rent + sale snapshot.
+
+    Distinct from `find_comparable_properties` (which filters to the subject's
+    rooms/surface segment): this is the broader district baseline. The gap
+    between this and the comp set tells the agent whether the subject sits in
+    a premium or discount segment within its district. `total_listings_in_district`
+    is a supply signal — deep markets compress yield, thin markets widen
+    bid-ask spreads.
+    """
+
+    district: str
+    fetched_at: str
+    rent: DistrictMarketSide
+    sale: DistrictMarketSide
+
+
 class _PhotoAnalysisLLM(_Frozen):
     """The strict shape the Haiku sub-call must produce (passed to messages.parse)."""
 
