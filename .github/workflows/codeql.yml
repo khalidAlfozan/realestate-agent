@@ -26,6 +26,7 @@ jobs:
     # Job name appears as the check name in the merge box.
     name: analyze
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
 

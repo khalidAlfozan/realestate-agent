@@ -11,9 +11,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Least privilege: CI only reads the checked-out code, never writes back.
+permissions:
+  contents: read
+
 jobs:
   ci:
     runs-on: ubuntu-latest
+    # Our CI finishes in well under a minute; 10 min is a generous ceiling
+    # that still kills a hung run before it burns Actions minutes.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
 
@@ -29,10 +36,11 @@ jobs:
         run: uv sync --frozen
 
       - name: Lint (ruff check)
-        run: uv run ruff check src tests
+        # evals/ is real code (the eval harness) — lint it too, not just src + tests.
+        run: uv run ruff check src tests evals
 
       - name: Format check (ruff format --check)
-        run: uv run ruff format --check src tests
+        run: uv run ruff format --check src tests evals
 
       - name: Type check (pyright)
         run: uv run pyright
