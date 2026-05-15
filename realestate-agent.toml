@@ -28,3 +28,9 @@
 # hit slow CDN responses; rotate user_agent if the CDN starts pushing back.
 # user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 # request_timeout_s = 15.0
+
+[gus_bdl]
+# GUS BDL (Bank Danych Lokalnych) API for Warsaw dzielnica demographics.
+# Used by get_district_demographics. The API key itself goes in .env, not here.
+# base_url = "https://bdl.stat.gov.pl/api/v1"
+# request_timeout_s = 10.0

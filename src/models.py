@@ -140,6 +140,30 @@ class DistrictMarketStats(_Frozen):
     sale: DistrictMarketSide
 
 
+class DistrictDemographics(_Frozen):
+    """Result of `get_district_demographics` — annual GUS BDL stats for a Warsaw dzielnica.
+
+    All metric fields are nullable: BDL doesn't always have data for every
+    (district, variable, year) combination. Missing fields render as a skipped
+    line in the memo rather than crashing the agent loop. Each metric carries
+    its own `_year` because BDL release cadence differs by topic — population
+    annually, dwellings annually but with longer lag, migration annually.
+    """
+
+    district: str
+    bdl_unit_id: str
+    fetched_at: str
+
+    population: int | None = None
+    population_year: int | None = None
+
+    dwellings: int | None = None
+    dwellings_year: int | None = None
+
+    net_migration: int | None = None
+    net_migration_year: int | None = None
+
+
 class _PhotoAnalysisLLM(_Frozen):
     """The strict shape the Haiku sub-call must produce (passed to messages.parse)."""
 
