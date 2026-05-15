@@ -106,15 +106,9 @@ def test_returns_full_demographics_on_happy_path(
     Year comes back from the live API as a STRING ('2024'), not int — fixture
     mirrors that to keep the test honest."""
     monkeypatch.setenv("GUS_BDL_API_KEY", "fake-key-for-test")
-    httpx_mock.add_response(
-        json=_bdl_response([{"year": "2024", "val": 145000, "attrId": 1}])
-    )
-    httpx_mock.add_response(
-        json=_bdl_response([{"year": "2024", "val": 109194, "attrId": 1}])
-    )
-    httpx_mock.add_response(
-        json=_bdl_response([{"year": "2024", "val": 408, "attrId": 1}])
-    )
+    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 145000, "attrId": 1}]))
+    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 109194, "attrId": 1}]))
+    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 408, "attrId": 1}]))
 
     result = get_district_demographics("Wola")
 
@@ -152,9 +146,7 @@ def test_partial_data_returns_nones_for_missing_fields(
     and the memo skips it — but the call still succeeds and returns the
     other variables."""
     monkeypatch.setenv("GUS_BDL_API_KEY", "fake-key-for-test")
-    httpx_mock.add_response(
-        json=_bdl_response([{"year": "2024", "val": 50000, "attrId": 1}])
-    )
+    httpx_mock.add_response(json=_bdl_response([{"year": "2024", "val": 50000, "attrId": 1}]))
     httpx_mock.add_response(json={"totalRecords": 0, "page": 0, "pageSize": 100, "results": []})
     httpx_mock.add_response(status_code=404, text="Not Found")
 

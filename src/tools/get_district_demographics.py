@@ -141,9 +141,7 @@ def get_district_demographics(district: str) -> DistrictDemographics:
 
     population, population_year = _fetch_latest_value(unit_id, _VAR_POPULATION, api_key)
     dwellings, dwellings_year = _fetch_latest_value(unit_id, _VAR_DWELLINGS, api_key)
-    net_migration, net_migration_year = _fetch_latest_value(
-        unit_id, _VAR_NET_MIGRATION, api_key
-    )
+    net_migration, net_migration_year = _fetch_latest_value(unit_id, _VAR_NET_MIGRATION, api_key)
 
     return DistrictDemographics(
         district=district,
