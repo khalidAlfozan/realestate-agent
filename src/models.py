@@ -163,6 +163,21 @@ class DistrictDemographics(_Frozen):
     net_migration: int | None = None
     net_migration_year: int | None = None
 
+    # Area + population gives density; agent computes the ratio in §2.
+    area_km2: float | None = None
+    area_km2_year: int | None = None
+
+    # Supply-side signal: faster pipeline → more rent compression. Normalised
+    # by population so it's comparable across dzielnice of different sizes.
+    new_dwellings_per_1000_residents: float | None = None
+    new_dwellings_per_1000_residents_year: int | None = None
+
+    # REGON-registered businesses per 1000 residents — proxy for commercial
+    # vitality / nearby-jobs density. High in central districts, lower in the
+    # outer ring.
+    businesses_per_1000_residents: float | None = None
+    businesses_per_1000_residents_year: int | None = None
+
 
 class _PhotoAnalysisLLM(_Frozen):
     """The strict shape the Haiku sub-call must produce (passed to messages.parse)."""

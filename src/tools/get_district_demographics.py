@@ -59,24 +59,32 @@ DZIELNICA_UNIT_IDS: dict[str, str] = {
 #   72305   - Ludność, stan w dniu 31 XII (year-end population)
 #   60811   - Zasoby mieszkaniowe / mieszkania ogółem (total dwellings)
 #   1365234 - Migracje gminne / saldo migracji ogółem (net migration count)
+#   2018    - Powierzchnia ogółem w km2 (district area)
+#   747060  - Mieszkania oddane do użytkowania na 1000 ludności (new dwellings rate)
+#   458173  - Podmioty REGON na 1000 ludności (businesses per 1000 residents)
 # Comments record the BDL catalogue label so future maintainers can re-verify
 # against bdl.stat.gov.pl. Updating these IDs is rare — BDL keeps catalogue
 # codes stable across releases.
 _VAR_POPULATION = 72305
 _VAR_DWELLINGS = 60811
 _VAR_NET_MIGRATION = 1365234
+_VAR_AREA_KM2 = 2018
+_VAR_NEW_DWELLINGS_PER_1000 = 747060
+_VAR_BUSINESSES_PER_1000 = 458173
 
 SCHEMA: ToolParam = {
     "name": "get_district_demographics",
     "description": (
         "Get annual dzielnica-level stats from Poland's Central Statistical Office "
-        "(GUS BDL): year-end population, total housing stock (dwellings), and "
-        "net migration balance (in-flows minus out-flows; positive = district is "
-        "growing, negative = shrinking). Each field reports the year of the most "
-        "recent observation. Wage and unemployment are deliberately NOT included "
-        "(BDL only publishes them at city level, not per dzielnica). Use these in "
-        "§2 (Neighbourhood context) to ground tenant-pool size, market depth, and "
-        "demand-trend claims in authoritative data."
+        "(GUS BDL): year-end population, total housing stock (dwellings), net migration "
+        "(in-flows minus out-flows; positive = growing), district area in km2 (combine "
+        "with population to compute density), new dwellings completed per 1000 residents "
+        "(supply-pressure signal — higher = more rent compression coming), and businesses "
+        "per 1000 residents (commercial vitality / nearby-jobs proxy). Each field reports "
+        "its observation year. Wage and unemployment are deliberately NOT included (BDL "
+        "only publishes them at city level, not per dzielnica). Use these in §2 "
+        "(Neighbourhood context) to ground tenant-pool, market depth, supply-pressure, "
+        "and density claims in authoritative data."
     ),
     "input_schema": {
         "type": "object",
@@ -142,6 +150,13 @@ def get_district_demographics(district: str) -> DistrictDemographics:
     population, population_year = _fetch_latest_value(unit_id, _VAR_POPULATION, api_key)
     dwellings, dwellings_year = _fetch_latest_value(unit_id, _VAR_DWELLINGS, api_key)
     net_migration, net_migration_year = _fetch_latest_value(unit_id, _VAR_NET_MIGRATION, api_key)
+    area_km2, area_km2_year = _fetch_latest_value(unit_id, _VAR_AREA_KM2, api_key)
+    new_dwellings_rate, new_dwellings_year = _fetch_latest_value(
+        unit_id, _VAR_NEW_DWELLINGS_PER_1000, api_key
+    )
+    businesses_rate, businesses_year = _fetch_latest_value(
+        unit_id, _VAR_BUSINESSES_PER_1000, api_key
+    )
 
     return DistrictDemographics(
         district=district,
@@ -153,4 +168,10 @@ def get_district_demographics(district: str) -> DistrictDemographics:
         dwellings_year=dwellings_year,
         net_migration=int(net_migration) if net_migration is not None else None,
         net_migration_year=net_migration_year,
+        area_km2=area_km2,
+        area_km2_year=area_km2_year,
+        new_dwellings_per_1000_residents=new_dwellings_rate,
+        new_dwellings_per_1000_residents_year=new_dwellings_year,
+        businesses_per_1000_residents=businesses_rate,
+        businesses_per_1000_residents_year=businesses_year,
     )
