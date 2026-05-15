@@ -117,17 +117,23 @@ def test_nearest_is_deduped_and_capped(httpx_mock: HTTPXMock) -> None:
 
 
 def test_nearest_sorted_by_distance(httpx_mock: HTTPXMock) -> None:
-    """Closest stops first — the agent's narrative should lead with 'X is 180m away'."""
+    """Closest stops first — the agent's narrative should lead with 'X is 180m away'.
+    Transit + parks fall within radius_m; schools within the wider school_radius_m."""
     httpx_mock.add_response(json=FIXTURE)
     result = get_nearby_amenities(latitude=_LAT, longitude=_LON, radius_m=500)
 
-    for cat in (result.tram, result.bus, result.school, result.park):
+    # Small slack on the bound: OSM ways report a centroid, our distance is
+    # straight-line to it, so an element near the edge can read slightly over.
+    for cat in (result.tram, result.bus, result.park):
         distances = [a.distance_m for a in cat.nearest]
         assert distances == sorted(distances)
-        # All distances should be within the search radius (small slack for OSM
-        # ways where 'around' uses geometry but our distance is to centroid)
         for d in distances:
-            assert d <= 700
+            assert d <= result.radius_m + 200
+
+    school_distances = [a.distance_m for a in result.school.nearest]
+    assert school_distances == sorted(school_distances)
+    for d in school_distances:
+        assert d <= result.school_radius_m + 200
 
 
 def test_metadata_passes_through(httpx_mock: HTTPXMock) -> None:
@@ -137,8 +143,40 @@ def test_metadata_passes_through(httpx_mock: HTTPXMock) -> None:
     assert result.latitude == _LAT
     assert result.longitude == _LON
     assert result.radius_m == 750
+    # 750 < 1200 floor, so schools widen to the catchment minimum.
+    assert result.school_radius_m == 1200
     parsed = datetime.fromisoformat(result.fetched_at)
     assert parsed.utcoffset() is not None
+
+
+def test_school_query_uses_wider_radius(httpx_mock: HTTPXMock) -> None:
+    """The Overpass query must search schools at the wider catchment radius —
+    a 500m disc misses schools in school-dense districts like Miasteczko Wilanów."""
+    httpx_mock.add_response(json=FIXTURE)
+    get_nearby_amenities(latitude=_LAT, longitude=_LON, radius_m=500)
+
+    request = httpx_mock.get_request()
+    assert request is not None
+    body = request.read().decode()
+    school_lines = [ln for ln in body.splitlines() if '"amenity"="school"' in ln]
+    assert school_lines  # both the node and way school clauses
+    for line in school_lines:
+        assert "around:1200" in line
+    # Transit clauses still use the tight 500m walkability radius.
+    transit_lines = [ln for ln in body.splitlines() if '"highway"="bus_stop"' in ln]
+    assert transit_lines
+    for line in transit_lines:
+        assert "around:500" in line
+
+
+def test_school_radius_never_narrower_than_transit(httpx_mock: HTTPXMock) -> None:
+    """A caller asking for a wide transit radius must not get a NARROWER school
+    search — school_radius_m is max(radius_m, 1200)."""
+    httpx_mock.add_response(json=FIXTURE)
+    result = get_nearby_amenities(latitude=_LAT, longitude=_LON, radius_m=1500)
+
+    assert result.radius_m == 1500
+    assert result.school_radius_m == 1500
 
 
 def test_empty_response_returns_zero_counts(httpx_mock: HTTPXMock) -> None:
