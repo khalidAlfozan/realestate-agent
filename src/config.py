@@ -82,6 +82,17 @@ class ScrapingSettings(_Section):
     request_timeout_s: float = 15.0
 
 
+class GusBdlSettings(_Section):
+    """Settings for GUS BDL (Bank Danych Lokalnych) API.
+
+    The API key itself is a secret — read via `require_gus_bdl_api_key()`,
+    not stored here.
+    """
+
+    base_url: str = "https://bdl.stat.gov.pl/api/v1"
+    request_timeout_s: float = 10.0
+
+
 class Settings(BaseSettings):
     """Top-level settings, layered: TOML file < env vars (RA_ prefix).
 
@@ -99,6 +110,7 @@ class Settings(BaseSettings):
     agent: AgentSettings = AgentSettings()
     vision: VisionSettings = VisionSettings()
     scraping: ScrapingSettings = ScrapingSettings()
+    gus_bdl: GusBdlSettings = GusBdlSettings()
     # The marker the CLI / eval harness uses to strip preamble before printing
     # the memo. Exposed here so the two consumers can't drift.
     memo_preamble_marker: str = "# Investment Memo:"
@@ -142,5 +154,20 @@ def require_anthropic_api_key() -> str:
             "ANTHROPIC_API_KEY is not set. Create a .env file at the project root "
             "(`cp .env.example .env`) and add a key from "
             "https://console.anthropic.com/settings/keys"
+        )
+    return key
+
+
+def require_gus_bdl_api_key() -> str:
+    """Return the GUS BDL API key, raising a helpful error if missing.
+
+    Same secrets-out-of-config pattern as the Anthropic key. The key is sent
+    as the X-ClientId header on every BDL request.
+    """
+    key = os.environ.get("GUS_BDL_API_KEY", "")
+    if not key:
+        raise RuntimeError(
+            "GUS_BDL_API_KEY is not set. Register a free key at "
+            "https://api.stat.gov.pl/Home/BdlApi and add it to .env."
         )
     return key
