@@ -11,11 +11,28 @@ from unittest.mock import MagicMock
 import pytest
 
 from src import cli
+from src.agent import RunResult
 
 # A structurally-valid Otodom listing URL — used across tests so they
 # pass the cli's URL validation guard. Doesn't have to point at a real
 # listing because run_agent is mocked.
 _VALID_URL = "https://www.otodom.pl/pl/oferta/test-listing-ID01"
+
+
+def _fake_result(memo: str) -> RunResult:
+    """Build a minimal RunResult — only `memo` matters for the CLI tests;
+    the metric fields are zeroed."""
+    return RunResult(
+        memo=memo,
+        iterations=1,
+        tool_calls=0,
+        input_tokens=0,
+        output_tokens=0,
+        cache_read_tokens=0,
+        cache_write_tokens=0,
+        cost_usd=0.0,
+        elapsed_s=0.0,
+    )
 
 
 def test_no_args_prints_usage_and_exits_nonzero(
@@ -58,10 +75,10 @@ def test_passes_url_to_run_agent_and_prints_returned_memo(
 
     captured_args: dict[str, Any] = {}
 
-    def fake_run_agent(client: Any, user_message: str) -> str:
+    def fake_run_agent(client: Any, user_message: str) -> RunResult:
         captured_args["client"] = client
         captured_args["user_message"] = user_message
-        return "# Investment Memo: Test"
+        return _fake_result("# Investment Memo: Test")
 
     monkeypatch.setattr(cli, "run_agent", fake_run_agent)
 
@@ -88,7 +105,7 @@ def test_strips_preamble_before_memo_marker(
     monkeypatch.setattr(
         cli,
         "run_agent",
-        lambda client, msg: (
+        lambda client, msg: _fake_result(
             "All four tools have returned. Writing the memo now.\n\n"
             "---\n\n"
             "# Investment Memo: Wola Listing\n\nBody continues here."
@@ -113,7 +130,9 @@ def test_memo_without_marker_passes_through_unchanged(
     went wrong."""
     monkeypatch.setattr(cli, "require_anthropic_api_key", lambda: "sk-ant-fake")
     monkeypatch.setattr(cli.anthropic, "Anthropic", lambda api_key: MagicMock())
-    monkeypatch.setattr(cli, "run_agent", lambda client, msg: "Some unexpected output")
+    monkeypatch.setattr(
+        cli, "run_agent", lambda client, msg: _fake_result("Some unexpected output")
+    )
 
     exit_code = cli.main([_VALID_URL])
 
@@ -129,7 +148,7 @@ def test_memo_starting_with_marker_is_unchanged(
     monkeypatch.setattr(cli, "require_anthropic_api_key", lambda: "sk-ant-fake")
     monkeypatch.setattr(cli.anthropic, "Anthropic", lambda api_key: MagicMock())
     memo = "# Investment Memo: Clean Output\n\nBody here."
-    monkeypatch.setattr(cli, "run_agent", lambda client, msg: memo)
+    monkeypatch.setattr(cli, "run_agent", lambda client, msg: _fake_result(memo))
 
     exit_code = cli.main([_VALID_URL])
 

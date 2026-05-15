@@ -38,17 +38,33 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     client = anthropic.Anthropic(api_key=require_anthropic_api_key())
-    memo = run_agent(
+    result = run_agent(
         client, f"Analyse this Warsaw property as a long-term rental investment: {url}"
     )
     # Belt-and-suspenders for the system prompt's "no preamble" rule:
     # Sonnet 4.6 occasionally prepends a transition acknowledgment ("All
     # tools done, writing the memo now") at the end of long tool chains.
     # Strip anything before the memo's actual start.
+    memo = result.memo
     marker = settings.memo_preamble_marker
     if marker in memo:
         memo = memo[memo.index(marker) :]
     print(memo)
+
+    # Run summary to stderr — visible to the operator alongside the memo.
+    log = logging.getLogger("src.cli")
+    log.info(
+        "run_summary iterations=%d tools=%d in=%d out=%d "
+        "cache_read=%d cache_write=%d cost_usd=%.4f elapsed_s=%.1f",
+        result.iterations,
+        result.tool_calls,
+        result.input_tokens,
+        result.output_tokens,
+        result.cache_read_tokens,
+        result.cache_write_tokens,
+        result.cost_usd,
+        result.elapsed_s,
+    )
     return 0
 
 
