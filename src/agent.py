@@ -128,10 +128,11 @@ def run_agent(
     for callers that want to display / persist them.
 
     `on_progress`, if given, is called with a short human-readable string at
-    each step — before every model call ("Claude is thinking...") and before
-    each tool batch ("Running: ..."). The Streamlit UI renders these as a live
-    feed so a multi-minute run isn't a blank spinner. It runs on the calling
-    thread (not the tool worker threads), so a UI callback can touch UI state.
+    each step — before every model call ("The agent is thinking...") and
+    before each tool batch ("Running: ..."). The Streamlit UI renders these as
+    a live feed so a multi-minute run isn't a blank spinner. It runs on the
+    calling thread (not the tool worker threads), so a UI callback can touch
+    UI state.
     """
     messages: list[dict[str, Any]] = [{"role": "user", "content": user_message}]
 
@@ -147,7 +148,7 @@ def run_agent(
 
     for iteration in range(max_iterations):
         if on_progress is not None:
-            on_progress(f"Claude is thinking (step {iteration + 1})...")
+            on_progress(f"The agent is thinking (step {iteration + 1})...")
 
         # cache_control on the last system block caches tools+system together
         # (tools render before system in the request). Stable prefix → cache
