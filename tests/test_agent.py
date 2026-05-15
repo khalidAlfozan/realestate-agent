@@ -539,6 +539,9 @@ class TestProgressCallback:
         assert len(thinking) == 2
         assert "step 1" in thinking[0].lower()
         assert "step 2" in thinking[1].lower()
+        # The feed names the agent (the product), not the underlying model.
+        assert "agent" in thinking[0].lower()
+        assert "claude" not in thinking[0].lower()
         # One tool batch → one 'Running:' line naming the tool.
         running = [e for e in events if e.startswith("Running:")]
         assert running == ["Running: get_property_details"]
