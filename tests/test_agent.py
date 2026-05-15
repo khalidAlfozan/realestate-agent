@@ -15,7 +15,12 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import BaseModel
 
-from src.agent import _execute_tool, run_agent
+from src.agent import (
+    _execute_tool,
+    build_analysis_request,
+    run_agent,
+    strip_memo_preamble,
+)
 
 # --------------------------------------------------------------------------- #
 # Helpers — fake Anthropic Messages with the shape the loop reads.
@@ -357,3 +362,30 @@ class TestRunAgent:
         result = run_agent(client, "Analyse")
 
         assert result.memo == ""
+
+
+class TestBuildAnalysisRequest:
+    def test_includes_the_url_and_warsaw_framing(self) -> None:
+        """Both entry points (CLI, Streamlit) call this — the agent must get the
+        URL plus the long-term-rental framing regardless of where it was invoked."""
+        url = "https://www.otodom.pl/pl/oferta/test-ID01"
+        msg = build_analysis_request(url)
+        assert url in msg
+        assert "Warsaw" in msg
+        assert "rental" in msg.lower()
+
+
+class TestStripMemoPreamble:
+    def test_strips_text_before_the_marker(self) -> None:
+        memo = "Done — writing the memo now.\n\n# Investment Memo: X\n\nBody."
+        assert strip_memo_preamble(memo).startswith("# Investment Memo:")
+
+    def test_passes_through_when_marker_is_absent(self) -> None:
+        """No marker (shouldn't happen) — return unchanged so the operator sees
+        whatever the model produced rather than an empty string."""
+        memo = "Some unexpected output with no marker."
+        assert strip_memo_preamble(memo) == memo
+
+    def test_unchanged_when_already_starts_with_marker(self) -> None:
+        memo = "# Investment Memo: Clean\n\nBody."
+        assert strip_memo_preamble(memo) == memo

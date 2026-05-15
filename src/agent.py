@@ -42,6 +42,31 @@ class RunResult:
     elapsed_s: float
 
 
+def build_analysis_request(url: str) -> str:
+    """Build the user message that kicks off a memo run for an Otodom listing.
+
+    Single source of truth for the run prompt — both the CLI and the Streamlit
+    UI call this, so the agent gets an identical instruction regardless of the
+    entry point.
+    """
+    return f"Analyse this Warsaw property as a long-term rental investment: {url}"
+
+
+def strip_memo_preamble(memo: str) -> str:
+    """Drop any text before the memo's `# Investment Memo:` marker.
+
+    Belt-and-suspenders for the system prompt's no-preamble rule: Sonnet 4.6
+    occasionally prepends a transition acknowledgment ("All tools done, writing
+    the memo now") at the end of a long tool chain. If the marker is absent
+    (shouldn't happen), the text is returned unchanged so the operator can see
+    whatever the model produced.
+    """
+    marker = settings.memo_preamble_marker
+    if marker in memo:
+        return memo[memo.index(marker) :]
+    return memo
+
+
 def _execute_tool(name: str, arguments: dict[str, Any]) -> str:
     fn = FUNCTIONS.get(name)
     if fn is None:

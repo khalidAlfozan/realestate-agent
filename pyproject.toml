@@ -12,6 +12,7 @@ dependencies = [
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.1",
     "python-dotenv>=1.2.2",
+    "streamlit>=1.57.0",
     "voyageai>=0.3.7",
 ]
 
@@ -80,7 +81,7 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.pyright]
-include = ["src", "tests", "evals"]
+include = ["src", "tests", "evals", "app.py"]
 pythonVersion = "3.13"
 typeCheckingMode = "basic"
 reportMissingImports = "error"

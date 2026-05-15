@@ -36,11 +36,12 @@ jobs:
         run: uv sync --frozen
 
       - name: Lint (ruff check)
-        # evals/ is real code (the eval harness) — lint it too, not just src + tests.
-        run: uv run ruff check src tests evals
+        # Lint everything with Python in it: src, tests, the eval harness,
+        # and the root-level Streamlit entry point.
+        run: uv run ruff check src tests evals app.py
 
       - name: Format check (ruff format --check)
-        run: uv run ruff format --check src tests evals
+        run: uv run ruff format --check src tests evals app.py
 
       - name: Type check (pyright)
         run: uv run pyright

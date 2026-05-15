@@ -11,8 +11,8 @@ import sys
 
 import anthropic
 
-from src.agent import run_agent
-from src.config import require_anthropic_api_key, settings
+from src.agent import build_analysis_request, run_agent, strip_memo_preamble
+from src.config import require_anthropic_api_key
 from src.url_validation import InvalidOtodomURLError, validate_otodom_listing_url
 
 
@@ -38,18 +38,8 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     client = anthropic.Anthropic(api_key=require_anthropic_api_key())
-    result = run_agent(
-        client, f"Analyse this Warsaw property as a long-term rental investment: {url}"
-    )
-    # Belt-and-suspenders for the system prompt's "no preamble" rule:
-    # Sonnet 4.6 occasionally prepends a transition acknowledgment ("All
-    # tools done, writing the memo now") at the end of long tool chains.
-    # Strip anything before the memo's actual start.
-    memo = result.memo
-    marker = settings.memo_preamble_marker
-    if marker in memo:
-        memo = memo[memo.index(marker) :]
-    print(memo)
+    result = run_agent(client, build_analysis_request(url))
+    print(strip_memo_preamble(result.memo))
 
     # Run summary to stderr — visible to the operator alongside the memo.
     log = logging.getLogger("src.cli")
