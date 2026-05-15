@@ -12,6 +12,11 @@ import pytest
 
 from src import cli
 
+# A structurally-valid Otodom listing URL — used across tests so they
+# pass the cli's URL validation guard. Doesn't have to point at a real
+# listing because run_agent is mocked.
+_VALID_URL = "https://www.otodom.pl/pl/oferta/test-listing-ID01"
+
 
 def test_no_args_prints_usage_and_exits_nonzero(
     capsys: pytest.CaptureFixture[str],
@@ -21,6 +26,25 @@ def test_no_args_prints_usage_and_exits_nonzero(
     assert exit_code == 1
     captured = capsys.readouterr()
     assert "usage:" in captured.err.lower()
+
+
+def test_invalid_url_exits_without_calling_run_agent(
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The whole point of the validation guard: bad URLs must NOT reach
+    run_agent (and therefore must NOT cost any Anthropic tokens)."""
+    run_agent_mock = MagicMock()
+    monkeypatch.setattr(cli, "run_agent", run_agent_mock)
+    monkeypatch.setattr(cli, "require_anthropic_api_key", lambda: "sk-ant-fake")
+
+    exit_code = cli.main(["https://www.marca.com"])
+
+    assert exit_code == 1
+    run_agent_mock.assert_not_called()
+    err = capsys.readouterr().err
+    assert "error:" in err.lower()
+    assert "host" in err.lower()
 
 
 def test_passes_url_to_run_agent_and_prints_returned_memo(
@@ -41,12 +65,12 @@ def test_passes_url_to_run_agent_and_prints_returned_memo(
 
     monkeypatch.setattr(cli, "run_agent", fake_run_agent)
 
-    exit_code = cli.main(["https://www.otodom.pl/pl/oferta/test-listing"])
+    exit_code = cli.main([_VALID_URL])
 
     assert exit_code == 0
     assert captured_args["client"] is fake_client
     # The CLI wraps the URL in an instruction; verify the URL got through.
-    assert "https://www.otodom.pl/pl/oferta/test-listing" in captured_args["user_message"]
+    assert _VALID_URL in captured_args["user_message"]
     assert "Warsaw" in captured_args["user_message"]
 
     captured = capsys.readouterr()
@@ -71,7 +95,7 @@ def test_strips_preamble_before_memo_marker(
         ),
     )
 
-    exit_code = cli.main(["https://example.com"])
+    exit_code = cli.main([_VALID_URL])
 
     assert exit_code == 0
     out = capsys.readouterr().out
@@ -91,7 +115,7 @@ def test_memo_without_marker_passes_through_unchanged(
     monkeypatch.setattr(cli.anthropic, "Anthropic", lambda api_key: MagicMock())
     monkeypatch.setattr(cli, "run_agent", lambda client, msg: "Some unexpected output")
 
-    exit_code = cli.main(["https://example.com"])
+    exit_code = cli.main([_VALID_URL])
 
     assert exit_code == 0
     assert "Some unexpected output" in capsys.readouterr().out
@@ -107,7 +131,7 @@ def test_memo_starting_with_marker_is_unchanged(
     memo = "# Investment Memo: Clean Output\n\nBody here."
     monkeypatch.setattr(cli, "run_agent", lambda client, msg: memo)
 
-    exit_code = cli.main(["https://example.com"])
+    exit_code = cli.main([_VALID_URL])
 
     assert exit_code == 0
     assert capsys.readouterr().out.strip() == memo.strip()
