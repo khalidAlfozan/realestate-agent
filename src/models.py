@@ -210,11 +210,17 @@ class NearbyAmenities(_Frozen):
     `count=0, nearest=[]`. Useful for §2 of the memo to anchor walkability /
     transit / schools / green-space claims in concrete distances rather than
     impressions.
+
+    Two radii: `radius_m` is the walkability radius for transit + parks;
+    `school_radius_m` is wider, because a school's catchment is larger than
+    the distance someone will walk to a tram stop. `subway`/`tram`/`bus`/`park`
+    counts are within `radius_m`; `school` counts are within `school_radius_m`.
     """
 
     latitude: float
     longitude: float
     radius_m: int
+    school_radius_m: int
     fetched_at: str
 
     subway: AmenityCategory

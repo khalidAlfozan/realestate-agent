@@ -17,6 +17,12 @@ in a single round-trip. Results are categorised into subway / tram /
 bus / school / park by tag priority; an interchange node tagged for
 both subway and tram counts as subway (highest priority).
 
+Transit and parks are searched within the caller's `radius_m` (a
+walkability distance); schools use a wider catchment radius, because a
+500m disc systematically under-reports schools — a family will travel
+further to a school than anyone walks to a tram stop. The two radii are
+reported separately on the result.
+
 Why a project-specific User-Agent: Overpass returns 406 Not Acceptable for
 both empty and browser-looking UAs (it's an API for apps, not browsers).
 We send an app-style UA that identifies the project per OSM etiquette.
@@ -40,6 +46,13 @@ from src.models import AmenityCategory, NearbyAmenities, NearbyAmenity
 # more relaxed "general convenience" radius).
 _DEFAULT_RADIUS_M = 500
 
+# Schools are searched at a wider radius than transit / parks: a family
+# routinely travels further to a school than anyone walks to a tram stop,
+# so a 500m disc systematically under-reports schools (a school-dense
+# district can show zero). Schools use max(radius_m, this) so a caller
+# asking for a wide transit radius never gets a NARROWER school search.
+_SCHOOL_MIN_RADIUS_M = 1200
+
 # Cap on nearest examples per category — keeps the payload tight. The agent
 # only needs the closest few of each kind, not every bus stop in a 500m disc.
 _TOP_N_NEAREST = 3
@@ -61,11 +74,14 @@ SCHEMA: ToolParam = {
     "description": (
         "Get transit stops, schools, and parks within walking distance of a "
         "property, via OpenStreetMap. Returns five categories (subway, tram, "
-        "bus, school, park), each with a count of OSM elements within the "
-        "radius and the closest few named examples with their distance in "
-        "metres from the subject. Use for §2 (Neighbourhood context) to "
-        "ground transit-access and walkability claims in concrete distances "
-        "rather than impressions. Pass the subject's lat/lon from "
+        "bus, school, park), each with a count of OSM elements and the closest "
+        "few named examples with their distance in metres from the subject. "
+        "Transit and parks are searched within radius_m (a walkability "
+        "distance); schools are searched at a wider catchment radius "
+        "(reported separately as school_radius_m), since families travel "
+        "further to a school than to a tram stop. Use for §2 (Neighbourhood "
+        "context) to ground transit-access and walkability claims in concrete "
+        "distances. Pass the subject's lat/lon from "
         "get_property_details.coordinates. Default radius 500m (~6-min walk); "
         "use 800-1000m for a more relaxed 'general convenience' assessment."
     ),
@@ -101,13 +117,14 @@ SCHEMA: ToolParam = {
 }
 
 
-def _build_query(latitude: float, longitude: float, radius_m: int) -> str:
+def _build_query(latitude: float, longitude: float, radius_m: int, school_radius_m: int) -> str:
     """One Overpass query covering all five amenity kinds.
 
-    Note we query both `node` and `way`/`relation` for amenity=school and
-    leisure=park because these are often mapped as polygons (ways) rather
-    than points. `out center tags` returns a centroid for ways/relations
-    so we can compute distance the same way as for nodes.
+    Transit + parks use `radius_m`; the two school clauses use the wider
+    `school_radius_m`. We query both `node` and `way`/`relation` for
+    amenity=school and leisure=park because these are often mapped as
+    polygons (ways) rather than points. `out center tags` returns a centroid
+    for ways/relations so we can compute distance the same way as for nodes.
     """
     return f"""[out:json][timeout:25];
 (
@@ -116,8 +133,8 @@ def _build_query(latitude: float, longitude: float, radius_m: int) -> str:
   node(around:{radius_m},{latitude},{longitude})["railway"="tram_stop"];
   node(around:{radius_m},{latitude},{longitude})["station"="subway"];
   node(around:{radius_m},{latitude},{longitude})["railway"="subway_entrance"];
-  node(around:{radius_m},{latitude},{longitude})["amenity"="school"];
-  way(around:{radius_m},{latitude},{longitude})["amenity"="school"];
+  node(around:{school_radius_m},{latitude},{longitude})["amenity"="school"];
+  way(around:{school_radius_m},{latitude},{longitude})["amenity"="school"];
   way(around:{radius_m},{latitude},{longitude})["leisure"="park"];
   relation(around:{radius_m},{latitude},{longitude})["leisure"="park"];
 );
@@ -215,9 +232,11 @@ def get_nearby_amenities(
     longitude: float,
     radius_m: int = _DEFAULT_RADIUS_M,
 ) -> NearbyAmenities:
+    # Schools get a wider catchment, but never narrower than the transit radius.
+    school_radius_m = max(radius_m, _SCHOOL_MIN_RADIUS_M)
     response = httpx.post(
         settings.overpass.base_url,
-        content=_build_query(latitude, longitude, radius_m),
+        content=_build_query(latitude, longitude, radius_m, school_radius_m),
         headers={
             "User-Agent": _OVERPASS_USER_AGENT,
             "Content-Type": "text/plain",
@@ -244,6 +263,7 @@ def get_nearby_amenities(
         latitude=latitude,
         longitude=longitude,
         radius_m=radius_m,
+        school_radius_m=school_radius_m,
         fetched_at=datetime.now(UTC).isoformat(timespec="seconds"),
         subway=_build_category(by_kind["subway"], latitude, longitude),
         tram=_build_category(by_kind["tram"], latitude, longitude),
