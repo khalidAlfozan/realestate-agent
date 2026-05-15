@@ -1,0 +1,955 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-05-15T19:36:04Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 205421615,
+  "lat": 52.2352043,
+  "lon": 20.9740402,
+  "tags": {
+    "name": "Zajezdnia Wola 03",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "old_name": "DT Wola 03",
+    "operator": "Tramwaje Warszawskie",
+    "operator:wikidata": "Q9360809",
+    "public_transport": "stop_position",
+    "railway": "tram_stop",
+    "ref": "500403",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "tactile_paving:slab_size": "40x40",
+    "tram": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 251281344,
+  "lat": 52.2336313,
+  "lon": 20.9665748,
+  "tags": {
+    "name": "Metro Płocka 04",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "operator": "Tramwaje Warszawskie",
+    "operator:wikidata": "Q9360809",
+    "public_transport": "stop_position",
+    "railway": "tram_stop",
+    "ref": "500504",
+    "shelter": "no",
+    "tactile_paving": "yes",
+    "tactile_paving:slab_size": "40x40",
+    "tram": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 251281345,
+  "lat": 52.2336833,
+  "lon": 20.9670800,
+  "tags": {
+    "name": "Metro Płocka 03",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "operator": "Tramwaje Warszawskie",
+    "operator:wikidata": "Q9360809",
+    "public_transport": "stop_position",
+    "railway": "tram_stop",
+    "ref": "500503",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "tactile_paving:slab_size": "40x40",
+    "tram": "yes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 340181324,
+  "lat": 52.2351183,
+  "lon": 20.9743366,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Zajezdnia Wola 01",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "500401",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5004&wtp_pt=01"
+  }
+},
+{
+  "type": "node",
+  "id": 411117430,
+  "lat": 52.2330998,
+  "lon": 20.9685551,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "disused:highway": "bus_stop",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Metro Płocka 08",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "500508",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "tram": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 435636911,
+  "lat": 52.2378003,
+  "lon": 20.9717061,
+  "tags": {
+    "name": "Młynarska 03",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "operator": "Tramwaje Warszawskie",
+    "operator:wikidata": "Q9360809",
+    "public_transport": "stop_position",
+    "railway": "tram_stop",
+    "ref": "502503",
+    "tactile_paving": "no",
+    "tram": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 435640642,
+  "lat": 52.2405697,
+  "lon": 20.9706922,
+  "tags": {
+    "name": "Długosza 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "operator": "Tramwaje Warszawskie",
+    "operator:wikidata": "Q9360809",
+    "public_transport": "stop_position",
+    "railway": "tram_stop",
+    "ref": "506602",
+    "shelter": "no",
+    "tactile_paving": "no",
+    "tram": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 610956365,
+  "lat": 52.2351874,
+  "lon": 20.9736179,
+  "tags": {
+    "name": "Zajezdnia Wola 06",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "old_name": "DT Wola 06",
+    "operator": "Tramwaje Warszawskie",
+    "operator:wikidata": "Q9360809",
+    "public_transport": "stop_position",
+    "railway": "tram_stop",
+    "ref": "500406",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "tactile_paving:slab_size": "40x40",
+    "tram": "yes",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 1345129043,
+  "lat": 52.2351357,
+  "lon": 20.9736509,
+  "tags": {
+    "name": "Zajezdnia Wola 04",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "old_name": "DT Wola 04",
+    "operator": "Tramwaje Warszawskie",
+    "operator:wikidata": "Q9360809",
+    "public_transport": "stop_position",
+    "railway": "tram_stop",
+    "ref": "500404",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "tactile_paving:slab_size": "40x40",
+    "tram": "yes",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 1774804324,
+  "lat": 52.2351920,
+  "lon": 20.9721307,
+  "tags": {
+    "addr:housenumber": "4",
+    "addr:street": "Stanisława Staszica",
+    "amenity": "school",
+    "check_date": "2025-08-22",
+    "name": "Niepubliczna Szkoła Podstawowa „W Kontakcie”",
+    "operator:type": "private"
+  }
+},
+{
+  "type": "node",
+  "id": 1857317859,
+  "lat": 52.2364592,
+  "lon": 20.9722532,
+  "tags": {
+    "name": "Młynarska 04",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "operator": "Tramwaje Warszawskie",
+    "operator:wikidata": "Q9360809",
+    "public_transport": "stop_position",
+    "railway": "tram_stop",
+    "ref": "502504",
+    "shelter": "yes",
+    "tram": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2451061737,
+  "lat": 52.2380907,
+  "lon": 20.9771089,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Leszno 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "502402",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5024&wtp_pt=02"
+  }
+},
+{
+  "type": "node",
+  "id": 2451061738,
+  "lat": 52.2374608,
+  "lon": 20.9733583,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Młynarska 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "502502",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5025&wtp_pt=02"
+  }
+},
+{
+  "type": "node",
+  "id": 2507317185,
+  "lat": 52.2378991,
+  "lon": 20.9775446,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Leszno 01",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "502401",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5024&wtp_pt=01"
+  }
+},
+{
+  "type": "node",
+  "id": 2507317186,
+  "lat": 52.2369942,
+  "lon": 20.9729165,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Młynarska 01",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "502501",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5025&wtp_pt=01"
+  }
+},
+{
+  "type": "node",
+  "id": 3035065903,
+  "lat": 52.2379419,
+  "lon": 20.9775128,
+  "tags": {
+    "bus": "yes",
+    "name": "Leszno 01",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "502401"
+  }
+},
+{
+  "type": "node",
+  "id": 3035065904,
+  "lat": 52.2380272,
+  "lon": 20.9770921,
+  "tags": {
+    "bus": "yes",
+    "name": "Leszno 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "502402"
+  }
+},
+{
+  "type": "node",
+  "id": 3035065919,
+  "lat": 52.2373937,
+  "lon": 20.9733445,
+  "tags": {
+    "bus": "yes",
+    "name": "Młynarska 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "502502"
+  }
+},
+{
+  "type": "node",
+  "id": 3035066862,
+  "lat": 52.2379792,
+  "lon": 20.9654681,
+  "tags": {
+    "bus": "yes",
+    "name": "Płocka-Szpital 04",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "502604",
+    "stop_position:direction": "forward"
+  }
+},
+{
+  "type": "node",
+  "id": 3035066864,
+  "lat": 52.2373349,
+  "lon": 20.9641219,
+  "tags": {
+    "bus": "yes",
+    "name": "Płocka-Szpital 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "502602"
+  }
+},
+{
+  "type": "node",
+  "id": 3035203680,
+  "lat": 52.2371012,
+  "lon": 20.9728969,
+  "tags": {
+    "bus": "yes",
+    "name": "Młynarska 01",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "502501"
+  }
+},
+{
+  "type": "node",
+  "id": 3035203685,
+  "lat": 52.2336881,
+  "lon": 20.9675692,
+  "tags": {
+    "bus": "yes",
+    "name": "Metro Płocka 01",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "network:wikipedia": "pl:Zarząd Transportu Miejskiego w Warszawie",
+    "public_transport": "stop_position",
+    "ref": "500501"
+  }
+},
+{
+  "type": "node",
+  "id": 3039342747,
+  "lat": 52.2351846,
+  "lon": 20.9742917,
+  "tags": {
+    "bus": "yes",
+    "name": "Zajezdnia Wola 01",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "500401"
+  }
+},
+{
+  "type": "node",
+  "id": 3039342748,
+  "lat": 52.2354636,
+  "lon": 20.9744495,
+  "tags": {
+    "bus": "yes",
+    "name": "Zajezdnia Wola 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "500402"
+  }
+},
+{
+  "type": "node",
+  "id": 3202004154,
+  "lat": 52.2334885,
+  "lon": 20.9653177,
+  "tags": {
+    "bus": "yes",
+    "name": "Metro Płocka 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "500502"
+  }
+},
+{
+  "type": "node",
+  "id": 3202004155,
+  "lat": 52.2328428,
+  "lon": 20.9662566,
+  "tags": {
+    "bus": "yes",
+    "name": "Metro Płocka 06",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "500506"
+  }
+},
+{
+  "type": "node",
+  "id": 4575930568,
+  "lat": 52.2364566,
+  "lon": 20.9722288,
+  "tags": {
+    "bus": "yes",
+    "name": "Młynarska 04",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "502504",
+    "stop_position:direction": "forward"
+  }
+},
+{
+  "type": "node",
+  "id": 4575930569,
+  "lat": 52.2405459,
+  "lon": 20.9706804,
+  "tags": {
+    "bus": "yes",
+    "name": "Długosza 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "506602",
+    "shelter": "no",
+    "stop_position:direction": "forward"
+  }
+},
+{
+  "type": "node",
+  "id": 4588164887,
+  "lat": 52.2405645,
+  "lon": 20.9707858,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "check_date:shelter": "2026-03-16",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Długosza 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "operator": "Tramwaje Warszawskie;Miejskie Zakłady Autobusowe",
+    "passenger_information_display": "no",
+    "public_transport": "platform",
+    "ref": "506602",
+    "shelter": "no",
+    "tactile_paving": "no",
+    "tram": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5066&wtp_pt=02"
+  }
+},
+{
+  "type": "node",
+  "id": 7580938064,
+  "lat": 52.2369346,
+  "lon": 20.9662234,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Płocka-Szpital 01",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "network:wikipedia": "pl:Zarząd Transportu Miejskiego w Warszawie",
+    "public_transport": "platform",
+    "ref": "502601",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5026&wtp_pt=01"
+  }
+},
+{
+  "type": "node",
+  "id": 7580938065,
+  "lat": 52.2370209,
+  "lon": 20.9663646,
+  "tags": {
+    "bus": "yes",
+    "name": "Płocka-Szpital 01",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "502601"
+  }
+},
+{
+  "type": "node",
+  "id": 9563096195,
+  "lat": 52.2380862,
+  "lon": 20.9759247,
+  "tags": {
+    "addr:city": "Warszawa",
+    "addr:housenumber": "62",
+    "addr:postcode": "01-193",
+    "addr:street": "Karolkowa",
+    "amenity": "school",
+    "check_date": "2024-06-15",
+    "name": "Niepubliczna Szkoła Podstawowa \"W kontakcie\"",
+    "official_name": "Niepubliczna Specjalna Szkoła Podstawowa dla Dzieci z Autyzmem \"W kontakcie\"",
+    "operator": "Fundacja na Rzecz Wspierania Dzieci z Autyzmem i Ich Rodzin \"W kontakcie\"",
+    "operator:type": "ngo",
+    "phone": "+48 509 267 707",
+    "religion": "none",
+    "website": "http://szkolawkontakcie.org/"
+  }
+},
+{
+  "type": "node",
+  "id": 9643162074,
+  "lat": 52.2364461,
+  "lon": 20.9685640,
+  "tags": {
+    "addr:city": "Warszawa",
+    "addr:housenumber": "13",
+    "addr:postcode": "01-189",
+    "addr:street": "Górczewska",
+    "amenity": "school",
+    "email": "ade.warszawa@dobraedukacja.edu.pl",
+    "grades": "1-12",
+    "isced:level": "1;2;3",
+    "name": "Akademia Dobrej Edukacji",
+    "operator": "Stowarzyszenie Dobra Edukacja",
+    "operator:type": "ngo",
+    "phone": "+48 785 570 775",
+    "website": "https://warszawa.dobraedukacja.edu.pl/"
+  }
+},
+{
+  "type": "node",
+  "id": 9643258270,
+  "lat": 52.2340781,
+  "lon": 20.9764395,
+  "tags": {
+    "addr:city": "Warszawa",
+    "addr:housenumber": "49",
+    "addr:postcode": "01-203",
+    "addr:street": "Karolkowa",
+    "amenity": "school",
+    "check_date": "2026-05-07",
+    "grades": "1-8",
+    "isced:level": "1,2",
+    "name": "Academy International",
+    "operator": "Academy International sp. z o.o.",
+    "operator:type": "private",
+    "website": "https://academyinternational.pl/en/school/karolkowa-49/"
+  }
+},
+{
+  "type": "node",
+  "id": 9743605008,
+  "lat": 52.2328585,
+  "lon": 20.9664041,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Metro Płocka 06",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "500506",
+    "shelter": "yes",
+    "tactile_paving": "no",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5005&wtp_pt=06"
+  }
+},
+{
+  "type": "node",
+  "id": 10159550316,
+  "lat": 52.2379613,
+  "lon": 20.9655993,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "departures_board": "timetable",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Płocka-Szpital 04",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "502604",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5026&wtp_pt=04"
+  }
+},
+{
+  "type": "node",
+  "id": 10159708711,
+  "lat": 52.2381274,
+  "lon": 20.9655092,
+  "tags": {
+    "bus": "yes",
+    "name": "Płocka-Szpital 03",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "stop_position",
+    "ref": "502603",
+    "stop_position:direction": "backward"
+  }
+},
+{
+  "type": "node",
+  "id": 10159744279,
+  "lat": 52.2336406,
+  "lon": 20.9676168,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Metro Płocka 01",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "500501",
+    "shelter": "no",
+    "tactile_paving": "no",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5005&wtp_pt=01"
+  }
+},
+{
+  "type": "node",
+  "id": 10300848225,
+  "lat": 52.2381263,
+  "lon": 20.9652926,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "departures_board": "timetable",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Płocka-Szpital 03",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "502603",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5026&wtp_pt=03"
+  }
+},
+{
+  "type": "node",
+  "id": 10705336028,
+  "lat": 52.2365913,
+  "lon": 20.9723125,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Młynarska 04",
+    "network": "ZTM Warszawa",
+    "not:network:wikidata": "Q8066998",
+    "operator": "Tramwaje Warszawskie",
+    "public_transport": "platform",
+    "ref": "502504",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "tram": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5025&wtp_pt=04"
+  }
+},
+{
+  "type": "node",
+  "id": 10706056111,
+  "lat": 52.2355751,
+  "lon": 20.9744587,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "check_date:shelter": "2022-10-05",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Zajezdnia Wola 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "500402",
+    "shelter": "yes",
+    "tactile_paving": "no",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5004&wtp_pt=02"
+  }
+},
+{
+  "type": "node",
+  "id": 11041760081,
+  "lat": 52.2335425,
+  "lon": 20.9653375,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Metro Płocka 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "500502",
+    "shelter": "no",
+    "tactile_paving": "no",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5005&wtp_pt=02"
+  }
+},
+{
+  "type": "node",
+  "id": 11078817333,
+  "lat": 52.2374220,
+  "lon": 20.9641339,
+  "tags": {
+    "bench": "yes",
+    "bin": "yes",
+    "bus": "yes",
+    "highway": "bus_stop",
+    "lit": "yes",
+    "name": "Płocka-Szpital 02",
+    "network": "ZTM Warszawa",
+    "network:wikidata": "Q8066998",
+    "public_transport": "platform",
+    "ref": "502602",
+    "shelter": "yes",
+    "tactile_paving": "yes",
+    "url": "https://www.wtp.waw.pl/rozklady-jazdy/?wtp_md=8&wtp_st=5026&wtp_pt=02"
+  }
+},
+{
+  "type": "node",
+  "id": 11743415066,
+  "lat": 52.2330979,
+  "lon": 20.9684596,
+  "tags": {
+    "name": "Metro Płocka 08",
+    "public_transport": "stop_position",
+    "railway": "tram_stop",
+    "tram": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 35071381,
+  "center": {
+    "lat": 52.2352724,
+    "lon": 20.9678471
+  },
+  "tags": {
+    "leisure": "park",
+    "name": "Skwer Wandy Lurie",
+    "surface": "grass"
+  }
+},
+{
+  "type": "way",
+  "id": 35071406,
+  "center": {
+    "lat": 52.2361809,
+    "lon": 20.9740522
+  },
+  "tags": {
+    "leisure": "park",
+    "name": "Skwer Gwary Warszawskiej"
+  }
+},
+{
+  "type": "way",
+  "id": 117968798,
+  "center": {
+    "lat": 52.2381278,
+    "lon": 20.9666564
+  },
+  "tags": {
+    "amenity": "school",
+    "email": "sp63@edu.um.warszawa.pl",
+    "fax": "+48 226323746",
+    "landuse": "education",
+    "name": "Szkoła Podstawowa nr 63 im. Zawiszy Czarnego",
+    "phone": "+48 22 632 37 46; +48 22 632 91 70",
+    "website": "http://www.szkola-podstawowa63.neostrada.pl/"
+  }
+},
+{
+  "type": "way",
+  "id": 220349213,
+  "center": {
+    "lat": 52.2377771,
+    "lon": 20.9691723
+  },
+  "tags": {
+    "leisure": "park",
+    "name": "Plac Opolski"
+  }
+},
+{
+  "type": "way",
+  "id": 421279228,
+  "center": {
+    "lat": 52.2364921,
+    "lon": 20.9769568
+  },
+  "tags": {
+    "addr:housenumber": "56",
+    "addr:street": "Karolkowa",
+    "amenity": "school",
+    "check_date": "2022-09-12",
+    "landuse": "education",
+    "name": "Szkoła Podstawowa nr 147",
+    "operator:type": "government"
+  }
+},
+{
+  "type": "way",
+  "id": 461553638,
+  "center": {
+    "lat": 52.2367330,
+    "lon": 20.9675315
+  },
+  "tags": {
+    "leisure": "park",
+    "name": "Różany Skwer Pysznych Pączków"
+  }
+},
+{
+  "type": "way",
+  "id": 476766786,
+  "center": {
+    "lat": 52.2342878,
+    "lon": 20.9649811
+  },
+  "tags": {
+    "leisure": "park",
+    "name": "Skwer „Sierpnia 1944”"
+  }
+},
+{
+  "type": "way",
+  "id": 505934398,
+  "center": {
+    "lat": 52.2401016,
+    "lon": 20.9739395
+  },
+  "tags": {
+    "addr:city": "Warszawa",
+    "addr:housenumber": "38/40",
+    "addr:postcode": "01-198",
+    "addr:street": "Żytnia",
+    "amenity": "school",
+    "denomination": "roman_catholic",
+    "email": "sp166@eduwarszawa.pl",
+    "grades": "0-8",
+    "layer": "1",
+    "mobile": "+48 47129",
+    "name": "Szkoła Podstawowa nr 166 im. Żwirki i Wigury",
+    "religion": "christian",
+    "website": "https://sp166.waw.pl"
+  }
+},
+{
+  "type": "way",
+  "id": 1155862633,
+  "center": {
+    "lat": 52.2360535,
+    "lon": 20.9696978
+  },
+  "tags": {
+    "amenity": "school",
+    "name": "Zespół Szkół Lauder-Morasha"
+  }
+}
+
+  ]
+}

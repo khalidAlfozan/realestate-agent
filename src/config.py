@@ -93,6 +93,19 @@ class GusBdlSettings(_Section):
     request_timeout_s: float = 10.0
 
 
+class OverpassSettings(_Section):
+    """Settings for the OpenStreetMap Overpass API.
+
+    No API key needed. Overpass requires a meaningful User-Agent on every
+    request — we reuse `settings.scraping.user_agent`. Timeout is generous
+    because Overpass occasionally queues queries under load (rare for our
+    small bbox queries, but possible).
+    """
+
+    base_url: str = "https://overpass-api.de/api/interpreter"
+    request_timeout_s: float = 30.0
+
+
 class Settings(BaseSettings):
     """Top-level settings, layered: TOML file < env vars (RA_ prefix).
 
@@ -111,6 +124,7 @@ class Settings(BaseSettings):
     vision: VisionSettings = VisionSettings()
     scraping: ScrapingSettings = ScrapingSettings()
     gus_bdl: GusBdlSettings = GusBdlSettings()
+    overpass: OverpassSettings = OverpassSettings()
     # The marker the CLI / eval harness uses to strip preamble before printing
     # the memo. Exposed here so the two consumers can't drift.
     memo_preamble_marker: str = "# Investment Memo:"

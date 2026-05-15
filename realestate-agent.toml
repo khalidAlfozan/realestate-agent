@@ -34,3 +34,10 @@
 # Used by get_district_demographics. The API key itself goes in .env, not here.
 # base_url = "https://bdl.stat.gov.pl/api/v1"
 # request_timeout_s = 10.0
+
+[overpass]
+# OpenStreetMap Overpass API for nearby amenities (transit, schools, parks).
+# Used by get_nearby_amenities. No API key needed. Reuses scraping.user_agent
+# (Overpass requires a meaningful UA on every request).
+# base_url = "https://overpass-api.de/api/interpreter"
+# request_timeout_s = 30.0
