@@ -11,12 +11,8 @@ import httpx
 from anthropic.types import ToolParam
 from bs4 import BeautifulSoup
 
+from src.config import settings
 from src.models import Comparable, ComparablesResult
-
-USER_AGENT = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-)
 
 # Otodom's roomsNumber filter takes an enum of word-form room counts.
 _ROOM_ENUMS = ["", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN"]
@@ -171,12 +167,12 @@ def find_comparable_properties(
     response = httpx.get(
         search_url,
         headers={
-            "User-Agent": USER_AGENT,
+            "User-Agent": settings.scraping.user_agent,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9,pl;q=0.8",
         },
         follow_redirects=True,
-        timeout=15.0,
+        timeout=settings.scraping.request_timeout_s,
     )
     response.raise_for_status()
 

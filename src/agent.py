@@ -10,7 +10,7 @@ import anthropic
 from anthropic.types import MessageParam
 from pydantic import BaseModel
 
-from src.config import MAX_TOKENS, MODEL_AGENT, PROMPTS
+from src.config import PROMPTS, settings
 from src.tools import FUNCTIONS, SCHEMAS
 
 SYSTEM_PROMPT = (PROMPTS / "system.md").read_text()
@@ -63,10 +63,10 @@ def run_agent(
         # (tools render before system in the request). Stable prefix → cache
         # hits on every iteration after the first.
         response = client.messages.create(
-            model=MODEL_AGENT,
-            max_tokens=MAX_TOKENS,
+            model=settings.agent.model,
+            max_tokens=settings.agent.max_tokens,
             thinking={"type": "adaptive"},
-            output_config={"effort": "medium"},
+            output_config={"effort": settings.agent.effort},
             system=[
                 {
                     "type": "text",

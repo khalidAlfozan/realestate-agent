@@ -12,7 +12,7 @@ import sys
 import anthropic
 
 from src.agent import run_agent
-from src.config import require_anthropic_api_key
+from src.config import require_anthropic_api_key, settings
 from src.url_validation import InvalidOtodomURLError, validate_otodom_listing_url
 
 
@@ -45,7 +45,7 @@ def main(argv: list[str] | None = None) -> int:
     # Sonnet 4.6 occasionally prepends a transition acknowledgment ("All
     # tools done, writing the memo now") at the end of long tool chains.
     # Strip anything before the memo's actual start.
-    marker = "# Investment Memo:"
+    marker = settings.memo_preamble_marker
     if marker in memo:
         memo = memo[memo.index(marker) :]
     print(memo)
