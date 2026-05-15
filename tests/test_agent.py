@@ -19,6 +19,7 @@ from pydantic import BaseModel
 
 from src.agent import (
     _execute_tool,
+    _format_tool_names,
     build_analysis_request,
     run_agent,
     strip_memo_preamble,
@@ -499,3 +500,70 @@ class TestConcurrentToolExecution:
         run_agent(client, "Analyse")
 
         assert [block["tool_use_id"] for block in snapshots[1]] == ["toolu_slow", "toolu_fast"]
+
+
+class TestFormatToolNames:
+    def test_single_tool_rendered_plain(self) -> None:
+        assert _format_tool_names(["get_property_details"]) == "get_property_details"
+
+    def test_repeated_tool_collapsed_with_count(self) -> None:
+        """A rent + sale comparables batch calls one tool twice — show it once."""
+        assert _format_tool_names(["a", "a", "b"]) == "a (x2), b"
+
+    def test_first_occurrence_order_preserved(self) -> None:
+        assert _format_tool_names(["b", "a", "b"]) == "b (x2), a"
+
+
+class TestProgressCallback:
+    """on_progress feeds the Streamlit live progress display."""
+
+    def test_reports_thinking_per_model_call_and_tools_per_batch(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        def fake_tool(**_: Any) -> dict[str, bool]:
+            return {"ok": True}
+
+        monkeypatch.setattr("src.agent.FUNCTIONS", {"get_property_details": fake_tool})
+        responses = [
+            _fake_tool_use_response("get_property_details", {"url": "x"}, "toolu_01"),
+            _fake_text_response("# Investment Memo: X"),
+        ]
+        client = MagicMock()
+        client.messages.create.side_effect = lambda **_: responses.pop(0)
+
+        events: list[str] = []
+        run_agent(client, "Analyse", on_progress=events.append)
+
+        # Two model calls → two 'thinking' lines, numbered.
+        thinking = [e for e in events if "thinking" in e.lower()]
+        assert len(thinking) == 2
+        assert "step 1" in thinking[0].lower()
+        assert "step 2" in thinking[1].lower()
+        # One tool batch → one 'Running:' line naming the tool.
+        running = [e for e in events if e.startswith("Running:")]
+        assert running == ["Running: get_property_details"]
+
+    def test_running_line_collapses_repeated_tool(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """The rent + sale comparables batch (same tool twice) shows once."""
+
+        def fake(**_: Any) -> dict[str, bool]:
+            return {"ok": True}
+
+        monkeypatch.setattr("src.agent.FUNCTIONS", {"find_comparable_properties": fake})
+        responses = [
+            _fake_multi_tool_use_response(
+                [
+                    ("find_comparable_properties", "toolu_a"),
+                    ("find_comparable_properties", "toolu_b"),
+                ]
+            ),
+            _fake_text_response("Done."),
+        ]
+        client = MagicMock()
+        client.messages.create.side_effect = lambda **_: responses.pop(0)
+
+        events: list[str] = []
+        run_agent(client, "Analyse", on_progress=events.append)
+
+        running = [e for e in events if e.startswith("Running:")]
+        assert running == ["Running: find_comparable_properties (x2)"]
