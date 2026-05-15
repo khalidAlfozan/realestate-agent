@@ -13,12 +13,22 @@ import anthropic
 
 from src.agent import run_agent
 from src.config import require_anthropic_api_key
+from src.url_validation import InvalidOtodomURLError, validate_otodom_listing_url
 
 
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     if len(args) < 1:
         print("usage: python -m src <otodom-url>", file=sys.stderr)
+        return 1
+
+    url = args[0]
+    # Fail fast on obvious typos / wrong sites BEFORE constructing the client
+    # or hitting the API. Saves both Anthropic tokens and ~10 seconds of latency.
+    try:
+        validate_otodom_listing_url(url)
+    except InvalidOtodomURLError as exc:
+        print(f"error: {exc}", file=sys.stderr)
         return 1
 
     logging.basicConfig(
@@ -28,7 +38,6 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     client = anthropic.Anthropic(api_key=require_anthropic_api_key())
-    url = args[0]
     memo = run_agent(
         client, f"Analyse this Warsaw property as a long-term rental investment: {url}"
     )
