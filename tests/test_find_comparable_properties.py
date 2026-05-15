@@ -11,9 +11,9 @@ from pathlib import Path
 import pytest
 from pytest_httpx import HTTPXMock
 
+from src.tools._otodom import district_slug as _district_slug
+from src.tools._otodom import percentile as _percentile
 from src.tools.find_comparable_properties import (
-    _district_slug,
-    _percentile,
     _rooms_filter,
     find_comparable_properties,
 )

@@ -13,14 +13,11 @@ from bs4 import BeautifulSoup
 
 from src.config import settings
 from src.models import Comparable, ComparablesResult
+from src.tools._otodom import district_slug as _district_slug
+from src.tools._otodom import percentile as _percentile
 
 # Otodom's roomsNumber filter takes an enum of word-form room counts.
 _ROOM_ENUMS = ["", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE", "TEN"]
-
-# Diacritic-stripping table for Polish district slugs (lowercase only).
-_PL_DIACRITICS = str.maketrans(
-    {"ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n", "ó": "o", "ś": "s", "ź": "z", "ż": "z"}
-)
 
 SCHEMA: ToolParam = {
     "name": "find_comparable_properties",
@@ -67,11 +64,6 @@ SCHEMA: ToolParam = {
 }
 
 
-def _district_slug(name: str) -> str:
-    """Normalise a Warsaw district name to its Otodom URL slug."""
-    return name.lower().translate(_PL_DIACRITICS).replace(" ", "-")
-
-
 def _rooms_filter(rooms: int) -> list[str]:
     """Build the ±1 room range for the Otodom roomsNumber enum."""
     lo = max(1, rooms - 1)
@@ -87,18 +79,6 @@ def _parse_rooms_enum(s: str | None) -> int | None:
         return _ROOM_ENUMS.index(s)
     except ValueError:
         return None
-
-
-def _percentile(values: list[int], p: float) -> int | None:
-    """p-th percentile (linear interpolation) of a non-empty list. None if empty."""
-    if not values:
-        return None
-    sorted_vals = sorted(values)
-    k = (len(sorted_vals) - 1) * (p / 100)
-    lo, hi = int(k), int(k) + 1
-    if hi >= len(sorted_vals):
-        return sorted_vals[-1]
-    return round(sorted_vals[lo] + (sorted_vals[hi] - sorted_vals[lo]) * (k - lo))
 
 
 def _build_search_url(
