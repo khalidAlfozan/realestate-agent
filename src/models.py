@@ -179,6 +179,51 @@ class DistrictDemographics(_Frozen):
     businesses_per_1000_residents_year: int | None = None
 
 
+class NearbyAmenity(_Frozen):
+    """One amenity within the search radius — name, distance from subject, location."""
+
+    name: str | None = None
+    distance_m: int
+    lat: float
+    lon: float
+
+
+class AmenityCategory(_Frozen):
+    """Counts + nearest examples for one amenity kind (subway, tram, bus, school, park).
+
+    `count` is raw OSM element count within the radius. Bus/tram stops are often
+    duplicated by direction (e.g. 'Leszno 01' + 'Leszno 02' as two OSM nodes), so
+    `count` may overstate distinct stop locations. The `nearest` list is deduped
+    by stripped name (the trailing ' 01' / ' 02' platform suffix is removed) to
+    show distinct locations.
+    """
+
+    count: int
+    nearest: list[NearbyAmenity]
+
+
+class NearbyAmenities(_Frozen):
+    """Result of `get_nearby_amenities` — counts + nearest examples for amenity
+    types within walking distance of a property.
+
+    All five categories are always present; categories with no matches return
+    `count=0, nearest=[]`. Useful for §2 of the memo to anchor walkability /
+    transit / schools / green-space claims in concrete distances rather than
+    impressions.
+    """
+
+    latitude: float
+    longitude: float
+    radius_m: int
+    fetched_at: str
+
+    subway: AmenityCategory
+    tram: AmenityCategory
+    bus: AmenityCategory
+    school: AmenityCategory
+    park: AmenityCategory
+
+
 class _PhotoAnalysisLLM(_Frozen):
     """The strict shape the Haiku sub-call must produce (passed to messages.parse)."""
 
