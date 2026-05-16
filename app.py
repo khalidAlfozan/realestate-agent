@@ -44,9 +44,8 @@ def _password_gate() -> None:
     """Halt the script unless the visitor has entered the shared password.
 
     Open when no APP_PASSWORD is set (local dev). When it is set — i.e. the
-    public deployment — this is the real access control; the per-session run
-    cap is only a spend guardrail layered on top. `compare_digest` keeps the
-    check constant-time.
+    public deployment — this is the app's access control. `compare_digest`
+    keeps the check constant-time.
     """
     expected = os.environ.get("APP_PASSWORD", "")
     if not expected or st.session_state.get("authenticated"):

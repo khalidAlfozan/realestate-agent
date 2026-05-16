@@ -1,9 +1,12 @@
 # Warsaw Rental Investment Analyst
 
+[![Live demo](https://img.shields.io/badge/live%20demo-streamlit.app-FF4B4B?logo=streamlit&logoColor=white)](https://realestate-agent.streamlit.app/)
 [![ci](https://github.com/khalidAlfozan/realestate-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/khalidAlfozan/realestate-agent/actions/workflows/ci.yml)
 [![codeql](https://github.com/khalidAlfozan/realestate-agent/actions/workflows/codeql.yml/badge.svg)](https://github.com/khalidAlfozan/realestate-agent/actions/workflows/codeql.yml)
 ![Python 3.13](https://img.shields.io/badge/python-3.13-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
+
+**Live demo:** [realestate-agent.streamlit.app](https://realestate-agent.streamlit.app/) — password-gated.
 
 Paste an [Otodom](https://www.otodom.pl) listing URL and get back a structured
 long-term-rental investment memo — yield analysis, rent and sale comparables,
@@ -199,13 +202,13 @@ The decisions a reviewer might ask about:
 ## Roadmap
 
 **Built:** the agent loop and all seven tools · CLI and Streamlit interfaces ·
-per-run cost / token / latency tracking · a ground-truth eval harness · typed
-configuration · CI with linting, type-checking, dependency hygiene, coverage
-gating, and CodeQL.
+a password-gated public deployment · per-run cost / token / latency tracking ·
+a ground-truth eval harness · typed configuration · CI with linting,
+type-checking, dependency hygiene, coverage gating, and CodeQL.
 
 **Next:** retrieval over a corpus of Polish market reports (pgvector + Voyage
-embeddings — dependencies are installed, not yet wired) · public deployment ·
-expanding the eval suite toward ~25 scored cases.
+embeddings — dependencies are installed, not yet wired) · expanding the eval
+suite toward ~25 scored cases.
 
 ## Scope
 
