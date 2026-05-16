@@ -26,15 +26,18 @@ def _load_secrets_into_env() -> None:
 
     The src/ code reads keys from the environment (via .env locally). On
     Streamlit Community Cloud there is no .env — secrets arrive via st.secrets
-    — so bridging them across keeps the Streamlit-agnostic code unchanged.
+    — so every secret is bridged across, keeping the Streamlit-agnostic code
+    unchanged. st.secrets holds exactly what's in the app's Secrets box, so
+    there's nothing to filter. A var already set (e.g. from a local .env) is
+    left untouched.
     """
     try:
         secrets = dict(st.secrets)
     except Exception:
         return  # no secrets store — local dev uses .env, nothing to bridge
-    for key in ("ANTHROPIC_API_KEY", "GUS_BDL_API_KEY", "APP_PASSWORD"):
-        if key not in os.environ and key in secrets:
-            os.environ[key] = str(secrets[key])
+    for key, value in secrets.items():
+        if key not in os.environ:
+            os.environ[key] = str(value)
 
 
 def _password_gate() -> None:
