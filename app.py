@@ -1,14 +1,17 @@
 """Streamlit entry point for the realestate-agent.
 
-A thin UI layer over the same pipeline the CLI drives: validate the URL,
-run the agent, strip any preamble, render the memo. All real logic lives
-in `src/` and is tested there — this module is glue.
+A thin UI layer over the same pipeline the CLI drives: gate on a shared
+password, validate the URL, run the agent, render the memo. All real logic
+lives in `src/` and is tested there — this module is glue.
 
 Run locally:
     uv run streamlit run app.py
 """
 
 from __future__ import annotations
+
+import hmac
+import os
 
 import anthropic
 import streamlit as st
@@ -17,9 +20,53 @@ from src.agent import build_analysis_request, run_agent, strip_memo_preamble
 from src.config import require_anthropic_api_key
 from src.url_validation import InvalidOtodomURLError, validate_otodom_listing_url
 
+
+def _load_secrets_into_env() -> None:
+    """Copy Streamlit Cloud secrets into os.environ.
+
+    The src/ code reads keys from the environment (via .env locally). On
+    Streamlit Community Cloud there is no .env — secrets arrive via st.secrets
+    — so every secret is bridged across, keeping the Streamlit-agnostic code
+    unchanged. st.secrets holds exactly what's in the app's Secrets box, so
+    there's nothing to filter. A var already set (e.g. from a local .env) is
+    left untouched.
+    """
+    try:
+        secrets = dict(st.secrets)
+    except Exception:
+        return  # no secrets store — local dev uses .env, nothing to bridge
+    for key, value in secrets.items():
+        if key not in os.environ:
+            os.environ[key] = str(value)
+
+
+def _password_gate() -> None:
+    """Halt the script unless the visitor has entered the shared password.
+
+    Open when no APP_PASSWORD is set (local dev). When it is set — i.e. the
+    public deployment — this is the real access control; the per-session run
+    cap is only a spend guardrail layered on top. `compare_digest` keeps the
+    check constant-time.
+    """
+    expected = os.environ.get("APP_PASSWORD", "")
+    if not expected or st.session_state.get("authenticated"):
+        return
+    st.caption("Private demo — enter the password to continue.")
+    entered = st.text_input("Password", type="password")
+    if entered and hmac.compare_digest(entered, expected):
+        st.session_state["authenticated"] = True
+        st.rerun()
+    if entered:
+        st.error("Incorrect password.")
+    st.stop()
+
+
 st.set_page_config(page_title="Warsaw Rental Investment Analyst", layout="centered")
+_load_secrets_into_env()
 
 st.title("Warsaw Rental Investment Analyst")
+_password_gate()
+
 st.caption(
     "Paste an Otodom listing URL. An AI agent fetches the "
     "listing, pulls rent/sale comparables, district market stats, GUS "
