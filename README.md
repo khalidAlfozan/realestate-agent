@@ -83,6 +83,26 @@ run still completes without it, but the agent reports the demographics as
 unavailable and the memo's neighbourhood section is thinner. Otodom and
 OpenStreetMap need no key.
 
+## Deployment
+
+The app is deploy-ready for [Streamlit Community Cloud](https://share.streamlit.io):
+
+1. Open **share.streamlit.io** and sign in with GitHub.
+2. **New app** → pick this repo, branch `main`, main file `app.py`, Python 3.13.
+3. Under **Secrets**, paste the keys from
+   [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example) with
+   real values — `ANTHROPIC_API_KEY`, `GUS_BDL_API_KEY`, and an `APP_PASSWORD`.
+4. Deploy.
+
+Two safeguards keep a public, key-backed deployment from running up an
+Anthropic bill:
+
+- **Password gate** — when `APP_PASSWORD` is set, every visitor must enter it
+  before they can run an analysis. Unset (local dev), the gate is open.
+- **Per-session run cap** — each browser session is limited to a small fixed
+  number of analyses. A page refresh resets it, so it's a spend guardrail, not
+  a hard wall; the password is the real lock.
+
 ## The investment memo
 
 Every run produces the same seven-section markdown template:

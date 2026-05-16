@@ -1,20 +1,32 @@
 """Tests for the Streamlit entry point (app.py).
 
 Uses Streamlit's official AppTest harness — runs the script in-process and
-inspects the rendered element tree. We cover the boot path and the URL-
-validation guard; neither needs an API key or touches the agent (validation
-fails fast, before the client is built). The happy path is covered indirectly:
-app.py is thin glue over run_agent / strip_memo_preamble, both tested in
-test_agent.py.
+inspects the rendered element tree. We cover the boot path, the URL-validation
+guard, the password gate, and the per-session run cap; none needs an API key
+or touches the agent (each guard stops before the client is built). The happy
+path is covered indirectly: app.py is thin glue over run_agent /
+strip_memo_preamble, both tested in test_agent.py.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from streamlit.testing.v1 import AppTest
 
 _APP_PATH = str(Path(__file__).resolve().parent.parent / "app.py")
+
+# A structurally-valid Otodom listing URL — passes validation so a test can
+# reach the run path. The agent is never actually invoked in these tests.
+_VALID_URL = "https://www.otodom.pl/pl/oferta/test-listing-ID01"
+
+
+@pytest.fixture(autouse=True)
+def _clear_app_password(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Run every test with a known APP_PASSWORD state — unset, so the gate is
+    open — regardless of the developer's local .env. Gate tests re-set it."""
+    monkeypatch.delenv("APP_PASSWORD", raising=False)
 
 
 def test_app_boots_without_error() -> None:
@@ -56,3 +68,48 @@ def test_malformed_otodom_path_shows_error() -> None:
 
     assert at.error
     assert "listing" in at.error[0].value.lower()
+
+
+def test_password_gate_blocks_when_configured(monkeypatch: pytest.MonkeyPatch) -> None:
+    """With APP_PASSWORD set, an unauthenticated visitor sees only a password
+    prompt — st.stop() fires before the Analyse button is ever rendered."""
+    monkeypatch.setenv("APP_PASSWORD", "letmein")
+    at = AppTest.from_file(_APP_PATH).run()
+
+    assert not at.exception
+    assert at.text_input  # the password field
+    assert len(at.button) == 0  # gated — the Analyse button is unreachable
+
+
+def test_password_gate_opens_once_authenticated(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A session flagged authenticated passes the gate and reaches the app."""
+    monkeypatch.setenv("APP_PASSWORD", "letmein")
+    at = AppTest.from_file(_APP_PATH).run()  # first run: gated
+    at.session_state["authenticated"] = True
+    at.run()  # second run: gate open
+
+    assert not at.exception
+    assert len(at.button) == 1  # the Analyse button is now reachable
+
+
+def test_password_gate_rejects_wrong_password(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("APP_PASSWORD", "letmein")
+    at = AppTest.from_file(_APP_PATH).run()
+    at.text_input[0].set_value("not-the-password")
+    at.run()
+
+    assert at.error
+    assert "incorrect" in at.error[0].value.lower()
+
+
+def test_session_cap_blocks_after_max_runs() -> None:
+    """A session that has used its run allowance is stopped before the agent is
+    reached — the per-session spend guardrail. The gate is open (no password)."""
+    at = AppTest.from_file(_APP_PATH).run()
+    at.session_state["run_count"] = 5
+    at.text_input[0].set_value(_VALID_URL)
+    at.button[0].click()
+    at.run()
+
+    assert at.warning
+    assert "limit" in at.warning[0].value.lower()
