@@ -10,12 +10,13 @@
 
 Paste an [Otodom](https://www.otodom.pl) listing URL and get back a structured
 long-term-rental investment memo — yield analysis, rent and sale comparables,
-district demographics, nearby-amenity context, a photo-based condition review,
-and a Buy / Walk / Borderline recommendation with a confidence score. Half a
+district demographics, nearby-amenity context, NBP market-report context, a
+photo-based condition review, and a Buy / Walk / Borderline recommendation with
+a confidence score. Half a
 day of analyst work compressed into a few minutes.
 
 It is a hand-rolled Claude agent: a tool-use loop built directly on the
-Anthropic SDK — no agent framework — that calls seven deterministic tools to
+Anthropic SDK — no agent framework — that calls eight deterministic tools to
 gather data and then writes the memo.
 
 ## How it works
@@ -25,9 +26,9 @@ flowchart TD
     A[Otodom listing URL] --> B{Structural URL check}
     B -- invalid --> C[Rejected — zero tokens spent]
     B -- valid --> D[Agent loop · Claude Sonnet 4.6]
-    D --> E[7 tools · concurrent within each batch]
+    D --> E[8 tools · concurrent within each batch]
     E --> D
-    D --> F[Investment memo · 7 sections]
+    D --> F[Investment memo · 8 sections]
 ```
 
 1. **Validate.** The URL is checked structurally before anything else — a bad
@@ -38,7 +39,7 @@ flowchart TD
 3. **Run tools concurrently.** Tools in a batch are independent and I/O-bound,
    so they run on a thread pool — a batch costs the slowest tool, not the sum.
 4. **Write the memo.** Once the data is in, the agent produces a fixed
-   seven-section markdown memo.
+   eight-section markdown memo.
 
 ## The tools
 
@@ -49,6 +50,7 @@ flowchart TD
 | `get_district_market_stats` | District-wide rent + sale baseline (median / p25 / p75 PLN/m²) and active-listing counts as a supply signal | Otodom |
 | `get_district_demographics` | Population, dwellings, net migration, area, new-dwelling rate, businesses per 1,000 residents | GUS BDL |
 | `get_nearby_amenities` | Subway / tram / bus / school / park counts and nearest examples, by walking distance from the property | OpenStreetMap |
+| `search_market_reports` | Semantic search over NBP housing-market reports — quarterly home-price reports and working papers — for macro context | NBP corpus |
 | `analyse_listing_photos` | Multimodal condition / renovation assessment and red flags | Claude Haiku 4.5 |
 | `calculate_gross_yield` | Gross-yield arithmetic — done in Python, never left to the model | — |
 
@@ -59,7 +61,27 @@ flowchart TD
 | **Otodom** | Listing details, comparables, district market stats | HTML scrape (`__NEXT_DATA__`); no key |
 | **GUS BDL** — Bank Danych Lokalnych, the Polish Central Statistical Office | District demographics | REST API; free `X-ClientId` key |
 | **OpenStreetMap Overpass** | Nearby transit, schools, parks | REST API; no key |
+| **NBP reports** — National Bank of Poland housing-market reports & working papers | Market-backdrop retrieval (RAG) | Pre-ingested into Postgres / pgvector; Voyage embeddings (key) |
 | **Anthropic API** | The agent loop and the vision sub-call | API key |
+
+## Market-report retrieval (RAG)
+
+The `search_market_reports` tool is backed by a retrieval layer over a corpus
+of National Bank of Poland (NBP) publications — quarterly housing-market
+reports (2021–2024) and analytical working papers on price cycles, the rental
+market, and housing-bubble risk. It gives the memo's **Market backdrop**
+section macro grounding the per-listing tools can't provide.
+
+- **Ingestion** — `uv run python -m src.rag.ingest` reads the report PDFs,
+  extracts text, splits it into overlapping chunks, embeds them with
+  [Voyage](https://voyageai.com) (`voyage-3.5`), and stores the vectors in a
+  Postgres + [pgvector](https://github.com/pgvector/pgvector) database. It is
+  idempotent and run once, not per-analysis.
+- **Retrieval** — at analysis time the tool embeds the agent's query the same
+  way and returns the nearest chunks by cosine distance, over an HNSW index.
+
+Ingestion is a separate local step; the deployed app only does retrieval, so it
+needs `DATABASE_URL` and `VOYAGE_API_KEY` set. See [`src/rag/`](src/rag).
 
 ## Quickstart
 
@@ -73,6 +95,8 @@ uv sync
 cp .env.example .env
 #   - ANTHROPIC_API_KEY   (required)            https://console.anthropic.com/settings/keys
 #   - GUS_BDL_API_KEY     (recommended, free)   https://api.stat.gov.pl/Home/BdlApi
+#   - VOYAGE_API_KEY      (recommended, free)   https://dash.voyageai.com
+#   - DATABASE_URL        (recommended)         pgvector Postgres — e.g. a free Neon database
 
 # 3a. Run the web app
 uv run streamlit run app.py
@@ -81,10 +105,11 @@ uv run streamlit run app.py
 uv run python -m src "https://www.otodom.pl/pl/oferta/<slug>-ID<id>"
 ```
 
-`ANTHROPIC_API_KEY` is required. `GUS_BDL_API_KEY` is free and recommended: a
-run still completes without it, but the agent reports the demographics as
-unavailable and the memo's neighbourhood section is thinner. Otodom and
-OpenStreetMap need no key.
+`ANTHROPIC_API_KEY` is required. The rest are recommended: `GUS_BDL_API_KEY`
+(free) powers district demographics, and `VOYAGE_API_KEY` (free) + `DATABASE_URL`
+power the market-backdrop retrieval. Without each, the agent marks that memo
+section unavailable rather than failing the run. Otodom and OpenStreetMap need
+no key.
 
 ## Deployment
 
@@ -99,6 +124,8 @@ The app is deploy-ready for [Streamlit Community Cloud](https://share.streamlit.
 # Streamlit Community Cloud secrets — paste into the app's Settings -> Secrets.
 ANTHROPIC_API_KEY = "sk-ant-..."        # required
 GUS_BDL_API_KEY = "..."                 # recommended (free) — district demographics
+VOYAGE_API_KEY = "..."                  # recommended (free) — market-report retrieval
+DATABASE_URL = "postgresql://..."       # recommended — pgvector store for retrieval
 APP_PASSWORD = "pick-a-strong-secret"   # gates the public app
 ```
 
@@ -108,15 +135,16 @@ they can run an analysis. Unset — i.e. local dev — the gate is open.
 
 ## The investment memo
 
-Every run produces the same seven-section markdown template:
+Every run produces the same eight-section markdown template:
 
 1. **Property summary** — what it is, when built, ownership form, heating
 2. **Neighbourhood context** — district character, GUS demographics, nearby amenities
-3. **Condition assessment** — photo-derived, cross-checked against the seller's claims
-4. **Comparables** — rentals and sales, with district-wide baselines
-5. **Financial analysis** — gross yield (from the tool) and net yield after the community fee
-6. **Risks and sensitivities** — vacancy, supply pressure, ownership-form liquidity, condition surprises
-7. **Recommendation** — Buy / Walk / Borderline, with a confidence score and a fair-value counter
+3. **Market backdrop** — where the Warsaw market sits in the price/rent cycle, from NBP reports
+4. **Condition assessment** — photo-derived, cross-checked against the seller's claims
+5. **Comparables** — rentals and sales, with district-wide baselines
+6. **Financial analysis** — gross yield (from the tool) and net yield after the community fee
+7. **Risks and sensitivities** — vacancy, supply pressure, ownership-form liquidity, condition surprises
+8. **Recommendation** — Buy / Walk / Borderline, with a confidence score and a fair-value counter
 
 ## Development
 
@@ -169,7 +197,8 @@ fix(ui): name the agent, not the model, in the progress feed
 │   ├── models.py             Pydantic I/O models for the tools
 │   ├── url_validation.py     structural Otodom-URL guard
 │   ├── prompts/              the system prompt
-│   └── tools/                the seven agent tools
+│   ├── rag/                  market-report corpus — ingest + pgvector retrieval
+│   └── tools/                the eight agent tools
 ├── evals/                    ground-truth eval harness
 ├── tests/                    test suite (CI-gated at 90% coverage)
 └── realestate-agent.toml     project config — overrides Settings defaults
@@ -201,14 +230,13 @@ The decisions a reviewer might ask about:
 
 ## Roadmap
 
-**Built:** the agent loop and all seven tools · CLI and Streamlit interfaces ·
-a password-gated public deployment · per-run cost / token / latency tracking ·
-a ground-truth eval harness · typed configuration · CI with linting,
-type-checking, dependency hygiene, coverage gating, and CodeQL.
+**Built:** the agent loop and all eight tools · CLI and Streamlit interfaces ·
+RAG retrieval over a corpus of NBP market reports (pgvector + Voyage
+embeddings) · a password-gated public deployment · per-run cost / token /
+latency tracking · a ground-truth eval harness · typed configuration · CI with
+linting, type-checking, dependency hygiene, coverage gating, and CodeQL.
 
-**Next:** retrieval over a corpus of Polish market reports (pgvector + Voyage
-embeddings — dependencies are installed, not yet wired) · expanding the eval
-suite toward ~25 scored cases.
+**Next:** expanding the eval suite toward ~25 scored cases.
 
 ## Scope
 

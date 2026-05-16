@@ -1,4 +1,4 @@
-"""pgvector store for the RAG corpus — schema and idempotent inserts.
+"""pgvector store for the RAG corpus — schema, inserts, and similarity search.
 
 Integration code: verified by a live smoke-run against Postgres, not unit
 tests (mocking psycopg would assert the mocks, not the integration). Kept
@@ -92,3 +92,19 @@ def replace_document(
             rows,
         )
     conn.commit()
+
+
+def search_chunks(
+    conn: psycopg.Connection, embedding: list[float], limit: int
+) -> list[tuple[str, str, float]]:
+    """Return the `limit` corpus chunks nearest to `embedding`, nearest-first.
+
+    Each row is `(source, content, distance)`, where distance is pgvector's
+    `<=>` cosine distance (0 = identical). The retrieval side of the RAG layer.
+    """
+    rows = conn.execute(
+        "SELECT source, content, embedding <=> %s::vector AS distance "
+        "FROM market_report_chunks ORDER BY distance LIMIT %s",
+        (embedding, limit),
+    ).fetchall()
+    return [(source, content, float(distance)) for source, content, distance in rows]

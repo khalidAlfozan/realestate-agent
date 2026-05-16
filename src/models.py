@@ -255,3 +255,41 @@ class PhotoAnalysis(_Frozen):
     red_flags: list[str]
     photos_analysed: int
     model_used: str
+
+
+class MarketReportExcerpt(_Frozen):
+    """One retrieved chunk from the NBP market-report corpus."""
+
+    source: str
+    content: str
+    similarity: float
+
+
+class MarketReportSearchResult(_Frozen):
+    """Result of `search_market_reports` — the query and its nearest corpus chunks.
+
+    `excerpts` are ordered nearest-first. `similarity` is `1 - cosine distance`
+    (pgvector's `<=>` operator), so higher means a closer match — easier for the
+    agent to read than a raw distance.
+    """
+
+    query: str
+    excerpts: list[MarketReportExcerpt]
+
+    @classmethod
+    def from_rows(cls, query: str, rows: list[tuple[str, str, float]]) -> MarketReportSearchResult:
+        """Build the result from raw `(source, content, cosine_distance)` rows.
+
+        Converting cosine distance to similarity is the one piece of real logic
+        on the search path; keeping it here makes it unit-testable without a live
+        database (the tool itself is integration code, verified by a live run).
+        """
+        return cls(
+            query=query,
+            excerpts=[
+                MarketReportExcerpt(
+                    source=source, content=content, similarity=round(1.0 - distance, 4)
+                )
+                for source, content, distance in rows
+            ],
+        )
