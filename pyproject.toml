@@ -98,13 +98,16 @@ branch = true
 omit = [
     # Module entry-point shim — three trivial lines, not worth covering.
     "src/__main__.py",
-    # Integration code — the pgvector store and the corpus-ingestion
-    # pipeline are verified by a live smoke-run against Postgres + Voyage,
-    # not unit tests; mocking psycopg / the embeddings API would assert the
-    # mocks, not the integration. The real logic (chunking, embed batching)
-    # lives in src/rag/chunking.py + embed.py and IS unit-tested.
+    # Integration code — the pgvector store, the corpus-ingestion pipeline,
+    # and the market-report search tool are verified by a live smoke-run
+    # against Postgres + Voyage, not unit tests; mocking psycopg / the
+    # embeddings API would assert the mocks, not the integration. The real
+    # logic (chunking, embed batching, and the distance→similarity shaping
+    # in MarketReportSearchResult.from_rows) lives in src/rag/chunking.py,
+    # src/rag/embed.py, and src/models.py and IS unit-tested.
     "src/rag/ingest.py",
     "src/rag/store.py",
+    "src/tools/search_market_reports.py",
 ]
 
 [tool.coverage.report]

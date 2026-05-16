@@ -29,6 +29,8 @@ from .get_nearby_amenities import SCHEMA as _NEARBY_AMENITIES_SCHEMA
 from .get_nearby_amenities import get_nearby_amenities
 from .get_property_details import SCHEMA as _PROPERTY_DETAILS_SCHEMA
 from .get_property_details import get_property_details
+from .search_market_reports import SCHEMA as _MARKET_REPORTS_SCHEMA
+from .search_market_reports import search_market_reports
 
 
 class Tool(NamedTuple):
@@ -42,6 +44,7 @@ TOOLS: list[Tool] = [
     Tool(_DISTRICT_STATS_SCHEMA, get_district_market_stats),
     Tool(_DISTRICT_DEMOGRAPHICS_SCHEMA, get_district_demographics),
     Tool(_NEARBY_AMENITIES_SCHEMA, get_nearby_amenities),
+    Tool(_MARKET_REPORTS_SCHEMA, search_market_reports),
     Tool(_PHOTOS_SCHEMA, analyse_listing_photos),
     Tool(_GROSS_YIELD_SCHEMA, calculate_gross_yield),
 ]
