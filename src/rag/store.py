@@ -21,18 +21,25 @@ from src.config import require_database_url, settings
 
 
 def connect() -> psycopg.Connection:
-    """Open a Postgres connection with the pgvector type adapter registered."""
+    """Open a Postgres connection with the pgvector type adapter registered.
+
+    The `vector` extension is created first if absent: `register_vector`
+    looks up the `vector` type in the catalog, so the extension must exist
+    before the adapter can be registered — true even on a brand-new database.
+    """
     conn = psycopg.connect(require_database_url())
+    conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
+    conn.commit()
     register_vector(conn)
     return conn
 
 
 def ensure_schema(conn: psycopg.Connection) -> None:
-    """Create the pgvector extension, the chunks table, and the HNSW index.
+    """Create the chunks table and its HNSW index.
 
-    Idempotent — safe to call on every ingestion run.
+    Idempotent — safe to call on every ingestion run. The `vector` extension
+    the table depends on is created by `connect()`.
     """
-    conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
     conn.execute(
         sql.SQL(
             "CREATE TABLE IF NOT EXISTS market_report_chunks ("
