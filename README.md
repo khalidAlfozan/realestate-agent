@@ -89,19 +89,19 @@ The app is deploy-ready for [Streamlit Community Cloud](https://share.streamlit.
 
 1. Open **share.streamlit.io** and sign in with GitHub.
 2. **New app** → pick this repo, branch `main`, main file `app.py`, Python 3.13.
-3. Under **Secrets**, paste the keys from
-   [`.streamlit/secrets.toml.example`](.streamlit/secrets.toml.example) with
-   real values — `ANTHROPIC_API_KEY`, `GUS_BDL_API_KEY`, and an `APP_PASSWORD`.
+3. Under **Secrets**, paste the TOML below with real values.
 4. Deploy.
 
-Two safeguards keep a public, key-backed deployment from running up an
-Anthropic bill:
+```toml
+# Streamlit Community Cloud secrets — paste into the app's Settings -> Secrets.
+ANTHROPIC_API_KEY = "sk-ant-..."        # required
+GUS_BDL_API_KEY = "..."                 # recommended (free) — district demographics
+APP_PASSWORD = "pick-a-strong-secret"   # gates the public app
+```
 
-- **Password gate** — when `APP_PASSWORD` is set, every visitor must enter it
-  before they can run an analysis. Unset (local dev), the gate is open.
-- **Per-session run cap** — each browser session is limited to a small fixed
-  number of analyses. A page refresh resets it, so it's a spend guardrail, not
-  a hard wall; the password is the real lock.
+A public deployment runs on your Anthropic key, so it is gated by a
+**password**: when `APP_PASSWORD` is set, every visitor must enter it before
+they can run an analysis. Unset — i.e. local dev — the gate is open.
 
 ## The investment memo
 

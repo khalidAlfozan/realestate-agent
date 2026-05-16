@@ -20,12 +20,6 @@ from src.agent import build_analysis_request, run_agent, strip_memo_preamble
 from src.config import require_anthropic_api_key
 from src.url_validation import InvalidOtodomURLError, validate_otodom_listing_url
 
-# Cap on agent runs per browser session — bounds Anthropic spend if the
-# (password-gated) link gets shared around. A page refresh starts a fresh
-# session, so this is a spend guardrail, not a hard wall; the password is the
-# real access control.
-_MAX_RUNS_PER_SESSION = 5
-
 
 def _load_secrets_into_env() -> None:
     """Copy Streamlit Cloud secrets into os.environ.
@@ -83,20 +77,8 @@ url = st.text_input(
     placeholder="https://www.otodom.pl/pl/oferta/...",
 )
 run_clicked = st.button("Analyse", type="primary")
-st.caption(
-    f"Analyses this session: {st.session_state.get('run_count', 0)} / {_MAX_RUNS_PER_SESSION}"
-)
 
 if run_clicked:
-    # Per-session spend guardrail — checked first, so a capped session can't
-    # even reach the agent.
-    if st.session_state.get("run_count", 0) >= _MAX_RUNS_PER_SESSION:
-        st.warning(
-            f"Session limit reached — {_MAX_RUNS_PER_SESSION} analyses per "
-            "session. Refresh the page to start a new session."
-        )
-        st.stop()
-
     # Fail fast on a bad URL before constructing the client or spending tokens.
     try:
         validate_otodom_listing_url(url)
@@ -109,10 +91,6 @@ if run_clicked:
     except RuntimeError as exc:
         st.error(str(exc))
         st.stop()
-
-    # This run is about to spend tokens — count it against the cap now, so a
-    # run that errors partway still consumes its slot.
-    st.session_state["run_count"] = st.session_state.get("run_count", 0) + 1
 
     # A live feed of the agent's steps — a multi-minute run should never be a
     # blank spinner. run_agent calls on_progress on this (the script) thread,

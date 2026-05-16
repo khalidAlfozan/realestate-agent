@@ -2,10 +2,10 @@
 
 Uses Streamlit's official AppTest harness — runs the script in-process and
 inspects the rendered element tree. We cover the boot path, the URL-validation
-guard, the password gate, and the per-session run cap; none needs an API key
-or touches the agent (each guard stops before the client is built). The happy
-path is covered indirectly: app.py is thin glue over run_agent /
-strip_memo_preamble, both tested in test_agent.py.
+guard, and the password gate; none needs an API key or touches the agent (each
+guard stops before the client is built). The happy path is covered indirectly:
+app.py is thin glue over run_agent / strip_memo_preamble, both tested in
+test_agent.py.
 """
 
 from __future__ import annotations
@@ -16,10 +16,6 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 _APP_PATH = str(Path(__file__).resolve().parent.parent / "app.py")
-
-# A structurally-valid Otodom listing URL — passes validation so a test can
-# reach the run path. The agent is never actually invoked in these tests.
-_VALID_URL = "https://www.otodom.pl/pl/oferta/test-listing-ID01"
 
 
 @pytest.fixture(autouse=True)
@@ -100,16 +96,3 @@ def test_password_gate_rejects_wrong_password(monkeypatch: pytest.MonkeyPatch) -
 
     assert at.error
     assert "incorrect" in at.error[0].value.lower()
-
-
-def test_session_cap_blocks_after_max_runs() -> None:
-    """A session that has used its run allowance is stopped before the agent is
-    reached — the per-session spend guardrail. The gate is open (no password)."""
-    at = AppTest.from_file(_APP_PATH).run()
-    at.session_state["run_count"] = 5
-    at.text_input[0].set_value(_VALID_URL)
-    at.button[0].click()
-    at.run()
-
-    assert at.warning
-    assert "limit" in at.warning[0].value.lower()
