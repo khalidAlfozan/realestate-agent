@@ -106,6 +106,24 @@ class OverpassSettings(_Section):
     request_timeout_s: float = 30.0
 
 
+class RagSettings(_Section):
+    """Settings for the market-report retrieval (RAG) layer.
+
+    `voyage_model` and `embedding_dim` must agree — the pgvector column is
+    `vector(embedding_dim)`, so changing the model means changing the dim
+    AND re-running ingestion with `--rebuild`. The Voyage API key and the
+    Postgres URL are secrets — read via the `require_*` helpers, not here.
+    """
+
+    voyage_model: str = "voyage-3.5"
+    embedding_dim: int = 1024
+    # Chars are a rough proxy for tokens (~4 chars/token); ~2000 chars keeps
+    # a chunk near 500 tokens, the sweet spot for retrieval precision.
+    chunk_target_chars: int = 2000
+    chunk_overlap_chars: int = 200
+    search_top_k: int = 6
+
+
 class Settings(BaseSettings):
     """Top-level settings, layered: TOML file < env vars (RA_ prefix).
 
@@ -125,6 +143,7 @@ class Settings(BaseSettings):
     scraping: ScrapingSettings = ScrapingSettings()
     gus_bdl: GusBdlSettings = GusBdlSettings()
     overpass: OverpassSettings = OverpassSettings()
+    rag: RagSettings = RagSettings()
     # The marker the CLI / eval harness uses to strip preamble before printing
     # the memo. Exposed here so the two consumers can't drift.
     memo_preamble_marker: str = "# Investment Memo:"
@@ -185,3 +204,31 @@ def require_gus_bdl_api_key() -> str:
             "https://api.stat.gov.pl/Home/BdlApi and add it to .env."
         )
     return key
+
+
+def require_voyage_api_key() -> str:
+    """Return the Voyage AI API key, raising a helpful error if missing.
+
+    Used by the RAG layer to embed corpus chunks and search queries.
+    """
+    key = os.environ.get("VOYAGE_API_KEY", "")
+    if not key:
+        raise RuntimeError(
+            "VOYAGE_API_KEY is not set. Get a key at https://dash.voyageai.com/ and add it to .env."
+        )
+    return key
+
+
+def require_database_url() -> str:
+    """Return the Postgres (pgvector) connection string, raising if missing.
+
+    Used by the RAG layer's pgvector store. Locally and on the deployed app
+    this points at the same database (e.g. a Neon project with pgvector).
+    """
+    url = os.environ.get("DATABASE_URL", "")
+    if not url:
+        raise RuntimeError(
+            "DATABASE_URL is not set. Add a pgvector-enabled Postgres "
+            "connection string (e.g. a Neon database) to .env."
+        )
+    return url

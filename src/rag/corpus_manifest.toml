@@ -1,0 +1,50 @@
+# NBP market-report corpus for the RAG layer — consumed by src/rag/ingest.py.
+#
+# These PDFs live on static.nbp.pl, which has no bot wall, so the ingestion
+# script downloads them directly. The bot-walled cyclical quarterly/annual
+# real-estate reports are added separately by dropping their PDFs into
+# data/corpus/ — see the README's "Market-report retrieval" section.
+#
+# `title` is the document's stable id (its `source` in the pgvector store and
+# the attribution shown in retrieval results). All URLs verified to serve a
+# real PDF; titles for the Polish-language papers are descriptive translations.
+
+[[document]]
+title = "NBP Working Paper — Recent trends in the real estate market and its analysis"
+url = "https://static.nbp.pl/publikacje/materialy-i-studia/243_2en.pdf"
+
+[[document]]
+title = "NBP Working Paper 182 — Recent trends in the real estate market and its analysis (2013)"
+url = "https://static.nbp.pl/publikacje/materialy-i-studia/182_en_2.pdf"
+
+[[document]]
+title = "NBP Working Paper 212 — Implementing Loan-to-Value and Debt-to-Income ratios"
+url = "https://static.nbp.pl/publikacje/materialy-i-studia/212_en.pdf"
+
+[[document]]
+title = "NBP Materialy i Studia 322 — The housing market in the euro area"
+url = "https://static.nbp.pl/publikacje/materialy-i-studia/ms322.pdf"
+
+[[document]]
+title = "NBP Materialy i Studia 325 — The role of the private rental housing market"
+url = "https://static.nbp.pl/publikacje/materialy-i-studia/ms325.pdf"
+
+[[document]]
+title = "NBP Materialy i Studia 238 — The euro and the risk of housing-market bubbles"
+url = "https://static.nbp.pl/publikacje/materialy-i-studia/ms238.pdf"
+
+[[document]]
+title = "NBP Materialy i Studia 326 — An early-warning model for housing-market bubbles"
+url = "https://static.nbp.pl/publikacje/materialy-i-studia/ms326.pdf"
+
+[[document]]
+title = "NBP Materialy i Studia 347 — Tenant preferences in the Polish housing market"
+url = "https://static.nbp.pl/publikacje/materialy-i-studia/ms347.pdf"
+
+[[document]]
+title = "NBP Materialy i Studia 350 — The market of occupied dwellings"
+url = "https://static.nbp.pl/publikacje/materialy-i-studia/ms350.pdf"
+
+[[document]]
+title = "NBP Inflation Report — November 2022"
+url = "https://static.nbp.pl/dokumenty/polityka-pieniezna/raporty-o-inflacji/raport_listopad_2022.pdf"
