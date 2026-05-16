@@ -1,99 +1,202 @@
-# realestate-agent
+# Warsaw Rental Investment Analyst
 
 [![ci](https://github.com/khalidAlfozan/realestate-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/khalidAlfozan/realestate-agent/actions/workflows/ci.yml)
+[![codeql](https://github.com/khalidAlfozan/realestate-agent/actions/workflows/codeql.yml/badge.svg)](https://github.com/khalidAlfozan/realestate-agent/actions/workflows/codeql.yml)
+![Python 3.13](https://img.shields.io/badge/python-3.13-blue)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-A single-user investment-analyst agent for the Warsaw residential rental market. Paste an Otodom listing URL and get back a structured investment memo: yield analysis, comparables, neighbourhood context, photo-based condition assessment, and a buy/walk recommendation with a confidence score — the half-day of analyst work compressed into a few minutes.
+Paste an [Otodom](https://www.otodom.pl) listing URL and get back a structured
+long-term-rental investment memo — yield analysis, rent and sale comparables,
+district demographics, nearby-amenity context, a photo-based condition review,
+and a Buy / Walk / Borderline recommendation with a confidence score. Half a
+day of analyst work compressed into a few minutes.
 
-## What it does
+It is a hand-rolled Claude agent: a tool-use loop built directly on the
+Anthropic SDK — no agent framework — that calls seven deterministic tools to
+gather data and then writes the memo.
 
-- Accepts a Warsaw residential property listing (Otodom URL; pasted listing text as fallback).
-- Runs an agentic loop (Claude Sonnet 4.6, hand-rolled with the Anthropic Python SDK and tool-use API) that calls deterministic tools to gather and reason over data.
-- Tools the agent can call:
-  - `get_property_details(url)` — scrape price (PLN), m², rooms, floor, build year, ownership form, community fee, heating type, location, photos.
-  - `find_comparable_properties(...)` — pull recent listings and sales in the same Warsaw district.
-  - `get_neighbourhood_stats(...)` — demographics, income, rental trends from GUS (Polish national statistics) and the Warsaw Open Data API.
-  - `analyse_listing_photos(image_urls)` — multimodal condition/age/renovation assessment.
-  - `calculate_financials(...)` — gross yield, net yield (after czynsz administracyjny), cap rate, 10-year IRR with interest-rate sensitivity. Pure Python, not LLM math.
-  - `search_market_reports(query)` — RAG over a curated corpus of Polish real estate research (NBP housing reports, AMRON-SARFiN, CBRE Poland, JLL Poland, Knight Frank Poland, Otodom Analytics, ING Bank Śląski research).
-- Outputs a markdown investment memo with a fixed seven-section template:
-  1. Property summary
-  2. Neighbourhood context
-  3. Condition assessment
-  4. Comparables (sales and rentals)
-  5. Financial analysis (yield, cap rate, 10-year IRR)
-  6. Risks and sensitivities
-  7. Recommendation (buy / walk) with confidence score and reasoning
+## How it works
 
-## What it doesn't do
+```mermaid
+flowchart TD
+    A[Otodom listing URL] --> B{Structural URL check}
+    B -- invalid --> C[Rejected — zero tokens spent]
+    B -- valid --> D[Agent loop · Claude Sonnet 4.6]
+    D --> E[7 tools · concurrent within each batch]
+    E --> D
+    D --> F[Investment memo · 7 sections]
+```
 
-- **Not multi-tenant.** One user, one local instance.
-- **Not multi-city.** Warsaw only.
-- **Not multi-asset-type.** Long-term residential rentals only — no short-lets/Airbnb, no commercial, no new-build off-plan, no land.
-- **No anti-bot arms race.** If Otodom blocks scraping, fall back to user-pasted text. Don't burn the v1 budget on scraper hardening.
-- **No transactional features.** No saved searches, no alerts, no portfolio tracking, no user accounts, no payments.
-- **No fine-tuning.** Off-the-shelf Claude models with prompting and tools.
-- **No agent framework.** Hand-rolled loop — no LangChain, LangGraph, or similar in v1.
+1. **Validate.** The URL is checked structurally before anything else — a bad
+   paste is rejected without constructing the API client or spending a token.
+2. **Drive the loop.** Claude Sonnet 4.6 runs an Anthropic tool-use loop. Each
+   turn it requests a batch of tool calls; the loop executes them and feeds the
+   results back.
+3. **Run tools concurrently.** Tools in a batch are independent and I/O-bound,
+   so they run on a thread pool — a batch costs the slowest tool, not the sum.
+4. **Write the memo.** Once the data is in, the agent produces a fixed
+   seven-section markdown memo.
 
-## Done (v1 acceptance criteria)
+## The tools
 
-v1 ships when **all** of the following are true:
+| Tool | What it does | Source |
+|---|---|---|
+| `get_property_details` | Scrapes the listing — price, m², rooms, floor, build year, ownership form, community fee, heating, coordinates, photos | Otodom |
+| `find_comparable_properties` | Similar listings (rooms ±1, surface ±20%) for rent **or** sale; median / p25 / p75 PLN/m². Called twice — rent and sale | Otodom |
+| `get_district_market_stats` | District-wide rent + sale baseline (median / p25 / p75 PLN/m²) and active-listing counts as a supply signal | Otodom |
+| `get_district_demographics` | Population, dwellings, net migration, area, new-dwelling rate, businesses per 1,000 residents | GUS BDL |
+| `get_nearby_amenities` | Subway / tram / bus / school / park counts and nearest examples, by walking distance from the property | OpenStreetMap |
+| `analyse_listing_photos` | Multimodal condition / renovation assessment and red flags | Claude Haiku 4.5 |
+| `calculate_gross_yield` | Gross-yield arithmetic — done in Python, never left to the model | — |
 
-1. **End-to-end demo:** From a Warsaw Otodom URL, the Streamlit app produces a complete seven-section memo in under three minutes per run.
-2. **Tools in place:** All six tools above are implemented and callable by the agent loop.
-3. **RAG corpus loaded:** ≥30 Polish market-report PDFs chunked, embedded, and queryable via pgvector.
-4. **Eval harness:** ≥25 manually-scored Warsaw properties in `evals/cases.json`, `python evals/run_evals.py` runs the agent on each and reports recommendation accuracy and section-level quality scores.
-5. **Cost + latency logging:** Every run emits structured JSON logs with per-call token counts, dollar cost, latency, and tool-call counts.
-6. **Deployed:** Reachable at a public URL (Railway or Fly.io) with the Anthropic key in env, not committed.
-7. **README explains the choices:** Why hand-rolled, why pgvector, why fail-soft scraping, why these models — the document a hiring manager would actually read.
+## Data sources
 
-Stretch (post-v1, only if time): MCP server packaging of the tools so other agents can consume them.
+| Source | Used for | Access |
+|---|---|---|
+| **Otodom** | Listing details, comparables, district market stats | HTML scrape (`__NEXT_DATA__`); no key |
+| **GUS BDL** — Bank Danych Lokalnych, the Polish Central Statistical Office | District demographics | REST API; free `X-ClientId` key |
+| **OpenStreetMap Overpass** | Nearby transit, schools, parks | REST API; no key |
+| **Anthropic API** | The agent loop and the vision sub-call | API key |
 
-## Stack
+## Quickstart
 
-Python 3.13 · Anthropic Python SDK · Claude Sonnet 4.6 (agent) + Claude Haiku 4.5 (classification) · pgvector on Postgres · `httpx` + `BeautifulSoup` · Streamlit · pytest · structured JSON logs.
+**Prerequisites:** Python 3.13 and [uv](https://docs.astral.sh/uv/).
 
-## Code quality
+```bash
+# 1. Install dependencies (uv manages the virtualenv)
+uv sync
 
-CI runs the following on every PR — see `.github/workflows/ci.yml`:
+# 2. Configure secrets
+cp .env.example .env
+#   - ANTHROPIC_API_KEY   (required)            https://console.anthropic.com/settings/keys
+#   - GUS_BDL_API_KEY     (recommended, free)   https://api.stat.gov.pl/Home/BdlApi
 
-| Tool | What it catches |
+# 3a. Run the web app
+uv run streamlit run app.py
+
+# 3b. ...or the CLI
+uv run python -m src "https://www.otodom.pl/pl/oferta/<slug>-ID<id>"
+```
+
+`ANTHROPIC_API_KEY` is required. `GUS_BDL_API_KEY` is free and recommended: a
+run still completes without it, but the agent reports the demographics as
+unavailable and the memo's neighbourhood section is thinner. Otodom and
+OpenStreetMap need no key.
+
+## The investment memo
+
+Every run produces the same seven-section markdown template:
+
+1. **Property summary** — what it is, when built, ownership form, heating
+2. **Neighbourhood context** — district character, GUS demographics, nearby amenities
+3. **Condition assessment** — photo-derived, cross-checked against the seller's claims
+4. **Comparables** — rentals and sales, with district-wide baselines
+5. **Financial analysis** — gross yield (from the tool) and net yield after the community fee
+6. **Risks and sensitivities** — vacancy, supply pressure, ownership-form liquidity, condition surprises
+7. **Recommendation** — Buy / Walk / Borderline, with a confidence score and a fair-value counter
+
+## Development
+
+```bash
+uv run ruff check src tests evals app.py           # lint
+uv run ruff format --check src tests evals app.py  # formatting
+uv run pyright                                     # type check
+uv run deptry .                                    # dependency hygiene
+uv run pytest -q                                   # tests + branch coverage
+uv run python -m evals.run_evals                   # ground-truth eval harness
+```
+
+### Continuous integration
+
+Every PR runs the checks below — see [`.github/workflows`](.github/workflows):
+
+| Check | What it catches |
 |---|---|
-| `ruff check` | Style, imports, complexity (`C90`, max 10), naming (`N`), security (`S` / bandit), pytest patterns (`PT`), unused args (`ARG`), simplifications (`SIM`), modernisation (`UP`) |
+| `ruff check` | A broad rule set: style, imports, security (bandit), a cyclomatic-complexity ceiling, naming, datetime safety, magic numbers, commented-out code, logging correctness, and more |
 | `ruff format --check` | Formatting drift |
-| `pyright` (basic) | Type errors |
-| `deptry` | Unused / missing / transitive deps |
-| `pytest --cov` | Tests + branch coverage; CI fails if total drops below **90%** |
-| `CodeQL` | GitHub-native SAST (security analysis). Results in the repo's **Security** tab. Runs on every PR + weekly schedule. |
+| `pyright` | Type errors |
+| `deptry` | Unused / missing / transitively-imported dependencies |
+| `pytest --cov` | Tests + branch coverage; CI fails if total coverage drops below **90%** |
+| `CodeQL` | GitHub-native security analysis (SAST); results in the **Security** tab; runs per-PR and weekly |
 
+### Commit conventions
 
-## Commit conventions
-
-PR titles must follow [Conventional Commits](https://www.conventionalcommits.org/) — enforced in CI by `.github/workflows/pr-title.yml`. Since `main` is squash-merged, the PR title becomes the commit message on `main`, so this gives the project a machine-readable history without forcing every PR-branch commit to comply.
-
-**Format:** `<type>(<optional scope>): <subject>`
-
-| Type | When |
-|---|---|
-| `feat` | New functionality (new tool, new memo section) |
-| `fix` | Bug fix |
-| `refactor` | Restructure without behaviour change |
-| `docs` | README, comments, prompt files |
-| `test` | Test-only changes |
-| `chore` | Housekeeping, deps |
-| `ci` | CI / workflow config |
-| `build` | `pyproject.toml`, `uv.lock`, build system |
-| `revert` | Revert a previous commit |
-
-Scopes are optional and free-form (`feat(tools): ...`, `feat(prompts): ...`). Subject lines: imperative mood, no trailing period.
-
-**Examples**
+`main` is squash-merged, so the PR title becomes the commit message — and PR
+titles are enforced as [Conventional Commits](https://www.conventionalcommits.org/)
+by [`pr-title.yml`](.github/workflows/pr-title.yml). Format:
+`<type>(<optional scope>): <subject>`, with types `feat`, `fix`, `refactor`,
+`docs`, `test`, `chore`, `ci`, `build`, `revert`.
 
 ```
-feat(tools): add find_comparable_properties + Pydantic models
-fix(config): make ANTHROPIC_API_KEY validation lazy
-refactor: layer CLI out of agent.py and type the tool registry
-ci: enforce conventional commit titles on PRs
-build(deps): bump anthropic to 0.101.0
+feat(tools): add get_district_demographics — GUS BDL dzielnica stats
+refactor(agent): execute tool-call batches concurrently
+fix(ui): name the agent, not the model, in the progress feed
 ```
 
-Breaking changes use `!` after the type/scope (`feat(api)!: ...`) or a `BREAKING CHANGE:` footer in the body.
+## Project layout
+
+```
+.
+├── app.py                    Streamlit entry point
+├── src/
+│   ├── agent.py              the hand-rolled tool-use loop
+│   ├── cli.py                command-line entry point
+│   ├── config.py             typed Settings (defaults < TOML < env vars)
+│   ├── cost.py               per-run cost from a dated pricing snapshot
+│   ├── models.py             Pydantic I/O models for the tools
+│   ├── url_validation.py     structural Otodom-URL guard
+│   ├── prompts/              the system prompt
+│   └── tools/                the seven agent tools
+├── evals/                    ground-truth eval harness
+├── tests/                    test suite (CI-gated at 90% coverage)
+└── realestate-agent.toml     project config — overrides Settings defaults
+```
+
+## Design notes
+
+The decisions a reviewer might ask about:
+
+- **Hand-rolled agent loop, no framework.** The loop — caching, concurrency,
+  cost accounting, the tool registry — is the part worth owning and showing.
+  No LangChain / LangGraph.
+- **Concurrent tool execution.** The model emits tool calls in parallel
+  batches; the loop honours that with a thread pool, so a batch's wall time is
+  the slowest tool rather than the sum.
+- **OpenStreetMap, not the Warsaw city API.** `api.um.warszawa.pl` is
+  geo-blocked outside Poland — unusable in CI or for anyone cloning the repo
+  abroad. OSM has equivalent Warsaw coverage, is globally reachable, and needs
+  no key.
+- **Fail-soft tools.** A tool exception becomes an error string in the tool
+  result, not a crashed loop — the agent surfaces it in the memo and continues.
+  Missing GUS data becomes a null field and a skipped memo line.
+- **Typed, layered configuration.** Pydantic Settings, resolved
+  defaults < `realestate-agent.toml` < `RA_*` environment variables. Secrets
+  live only in `.env` (gitignored), never in the config file.
+- **Pricing snapshot with a staleness check.** Anthropic doesn't publish
+  prices via API, so the cost table is hand-curated with a snapshot date that
+  self-warns once it ages past six months.
+
+## Roadmap
+
+**Built:** the agent loop and all seven tools · CLI and Streamlit interfaces ·
+per-run cost / token / latency tracking · a ground-truth eval harness · typed
+configuration · CI with linting, type-checking, dependency hygiene, coverage
+gating, and CodeQL.
+
+**Next:** retrieval over a corpus of Polish market reports (pgvector + Voyage
+embeddings — dependencies are installed, not yet wired) · public deployment ·
+expanding the eval suite toward ~25 scored cases.
+
+## Scope
+
+Deliberately narrow — this is a focused v1, not a platform:
+
+- **Single user.** One local instance; not multi-tenant.
+- **Warsaw only.** District logic and data sources are Warsaw-specific.
+- **Long-term residential rentals only.** No short-let, commercial, or land.
+- **No agent framework and no fine-tuning** — off-the-shelf Claude models,
+  prompting, and tools.
+
+## License
+
+[MIT](LICENSE)
