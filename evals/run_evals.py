@@ -4,6 +4,7 @@ Usage:
     uv run python -m evals.run_evals                 # run all cases
     uv run python -m evals.run_evals --case wola-1959  # one case by id
     uv run python -m evals.run_evals --no-cache      # force re-run
+    uv run python -m evals.run_evals --rerecord      # re-record tool snapshots
     uv run python -m evals.run_evals --verbose       # also print full memos
 """
 
@@ -19,6 +20,7 @@ import anthropic
 from pydantic import TypeAdapter
 
 from evals import cache as memo_cache
+from evals import snapshot
 from evals.models import EvalCase, EvalCheck, EvalResult, Expected, ParsedMemo
 from evals.parse_memo import parse_memo
 from src.agent import SYSTEM_PROMPT, build_analysis_request, run_agent
@@ -34,17 +36,29 @@ def load_cases() -> list[EvalCase]:
 
 
 def run_eval_case(
-    client: anthropic.Anthropic, case: EvalCase, *, no_cache: bool = False
+    client: anthropic.Anthropic,
+    case: EvalCase,
+    *,
+    no_cache: bool = False,
+    rerecord: bool = False,
 ) -> tuple[str, bool]:
-    """Run the agent on one case, returning (memo, was_cached). Caches by
-    case_id + system_prompt hash so prompt changes invalidate the cache."""
+    """Run the agent on one case, returning (memo, was_cached).
+
+    Memos are cached by case_id + system-prompt hash, so a prompt change
+    invalidates the cache. Tool results are snapshotted by case_id: the
+    first run records them; later runs replay, so the case re-runs against
+    fixed tool inputs even after its listing delists.
+    """
     if not no_cache:
         cached = memo_cache.load(case.id, SYSTEM_PROMPT)
         if cached:
             return cached, True
 
     user_message = build_analysis_request(case.url)
-    result = run_agent(client, user_message)
+    record = rerecord or not snapshot.has_snapshot(case.id)
+    tool_io = snapshot.recording(case.id) if record else snapshot.replaying(case.id)
+    with tool_io:
+        result = run_agent(client, user_message)
     memo = result.memo
     # Belt-and-suspenders preamble strip (mirrors src.cli's behaviour).
     marker = settings.memo_preamble_marker
@@ -162,6 +176,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--case", help="Run only the case with this id.")
     parser.add_argument("--no-cache", action="store_true", help="Force re-run even if cached.")
     parser.add_argument(
+        "--rerecord",
+        action="store_true",
+        help="Re-record tool snapshots from live calls, even if a snapshot exists.",
+    )
+    parser.add_argument(
         "--verbose", action="store_true", help="Also print the full memo for each case."
     )
     args = parser.parse_args(argv)
@@ -187,7 +206,9 @@ def main(argv: list[str] | None = None) -> int:
 
     results: list[EvalResult] = []
     for case in cases:
-        memo, was_cached = run_eval_case(client, case, no_cache=args.no_cache)
+        memo, was_cached = run_eval_case(
+            client, case, no_cache=args.no_cache, rerecord=args.rerecord
+        )
         parsed = parse_memo(memo)
         checks = evaluate(case, parsed)
         result = EvalResult(case_id=case.id, parsed=parsed, checks=checks, cached=was_cached)

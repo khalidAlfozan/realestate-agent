@@ -29,7 +29,7 @@ class Expected(_Frozen):
     rent_comp_count_min: int | None = None
     sale_comp_count_min: int | None = None
 
-    # Substrings that must appear in §6 (Risks). Case-insensitive.
+    # Substrings that must appear in §7 (Risks). Case-insensitive.
     risks_must_include: list[str] = []
 
 
@@ -53,7 +53,7 @@ class ParsedMemo(_Frozen):
     photos_analysed: int | None = None
     rent_comp_count: int | None = None
     sale_comp_count: int | None = None
-    risks_text: str = ""  # the whole §6 body, for substring matching
+    risks_text: str = ""  # the whole §7 body, for substring matching
 
 
 class EvalCheck(_Frozen):
