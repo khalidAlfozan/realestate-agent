@@ -19,6 +19,8 @@ It is a hand-rolled Claude agent: a tool-use loop built directly on the
 Anthropic SDK — no agent framework — that calls eight deterministic tools to
 gather data and then writes the memo.
 
+![The Warsaw Rental Investment Analyst app analysing an Otodom listing](docs/screenshot.png)
+
 ## How it works
 
 ```mermaid
@@ -26,20 +28,42 @@ flowchart TD
     A[Otodom listing URL] --> B{Structural URL check}
     B -- invalid --> C[Rejected — zero tokens spent]
     B -- valid --> D[Agent loop · Claude Sonnet 4.6]
-    D --> E[8 tools · concurrent within each batch]
-    E --> D
-    D --> F[Investment memo · 8 sections]
+    D --> E[Round 1 · fetch listing details]
+    E --> F[Round 2 · 6 context tools, one parallel batch]
+    F --> G[Round 3 · compute gross yield]
+    G --> H[Round 4 · write the memo]
+    H --> I[Investment memo · 8 sections]
 ```
 
 1. **Validate.** The URL is checked structurally before anything else — a bad
    paste is rejected without constructing the API client or spending a token.
-2. **Drive the loop.** Claude Sonnet 4.6 runs an Anthropic tool-use loop. Each
-   turn it requests a batch of tool calls; the loop executes them and feeds the
-   results back.
-3. **Run tools concurrently.** Tools in a batch are independent and I/O-bound,
-   so they run on a thread pool — a batch costs the slowest tool, not the sum.
-4. **Write the memo.** Once the data is in, the agent produces a fixed
-   eight-section markdown memo.
+2. **Drive the loop.** Claude Sonnet 4.6 runs a hand-rolled tool-use loop —
+   four model rounds: fetch the listing, then pull every context tool in one
+   parallel batch, then compute the gross yield, then write the memo.
+3. **Run tools concurrently.** The round-2 tools are independent and I/O-bound,
+   so the loop runs them on a thread pool — the batch costs the slowest tool,
+   not the sum.
+4. **Write the memo.** The agent's final round is the memo itself — a fixed
+   eight-section markdown document, emitted with no preamble.
+
+## The investment memo
+
+Every run produces the same eight-section markdown template:
+
+1. **Property summary** — what it is, when built, ownership form, heating
+2. **Neighbourhood context** — district character, GUS demographics, nearby amenities
+3. **Market backdrop** — where the Warsaw market sits in the price/rent cycle, from NBP reports
+4. **Condition assessment** — photo-derived, cross-checked against the seller's claims
+5. **Comparables** — rentals and sales, with district-wide baselines
+6. **Financial analysis** — gross yield (from the tool) and net yield after the community fee
+7. **Risks and sensitivities** — vacancy, supply pressure, ownership-form liquidity, condition surprises
+8. **Recommendation** — Buy / Walk / Borderline, with a confidence score and a fair-value counter
+
+A full run is in **[`examples/sample-memo.md`](examples/sample-memo.md)** — it closes with a verdict like:
+
+> **Verdict:** Walk at asking price; Negotiate down. **Confidence:** High.
+>
+> The fundamental problem is a trifecta: a 14.7% price premium over comp-set median applied to a ground-floor, FAIR-condition, 1990s concrete-panel block in a no-metro outer district, yielding only 5.18% gross and 4.0% net after the 1,500 PLN monthly czynsz — inadequate for the risk profile. [...] Walk at 1,530,000 PLN; would reconsider at approximately 1,260,000–1,330,000 PLN, where gross yield clears 6.0–6.3%.
 
 ## The tools
 
@@ -106,10 +130,11 @@ uv run python -m src "https://www.otodom.pl/pl/oferta/<slug>-ID<id>"
 ```
 
 `ANTHROPIC_API_KEY` is required. The rest are recommended: `GUS_BDL_API_KEY`
-(free) powers district demographics, and `VOYAGE_API_KEY` (free) + `DATABASE_URL`
-power the market-backdrop retrieval. Without each, the agent marks that memo
-section unavailable rather than failing the run. Otodom and OpenStreetMap need
-no key.
+(free) powers district demographics; `VOYAGE_API_KEY` (free) and `DATABASE_URL`
+power the market-backdrop retrieval — which also needs a one-off corpus
+ingestion (see [Market-report retrieval](#market-report-retrieval-rag)). Without
+any of these the agent marks that memo section unavailable rather than failing
+the run. Otodom and OpenStreetMap need no key.
 
 ## Deployment
 
@@ -132,19 +157,6 @@ APP_PASSWORD = "pick-a-strong-secret"   # gates the public app
 A public deployment runs on your Anthropic key, so it is gated by a
 **password**: when `APP_PASSWORD` is set, every visitor must enter it before
 they can run an analysis. Unset — i.e. local dev — the gate is open.
-
-## The investment memo
-
-Every run produces the same eight-section markdown template:
-
-1. **Property summary** — what it is, when built, ownership form, heating
-2. **Neighbourhood context** — district character, GUS demographics, nearby amenities
-3. **Market backdrop** — where the Warsaw market sits in the price/rent cycle, from NBP reports
-4. **Condition assessment** — photo-derived, cross-checked against the seller's claims
-5. **Comparables** — rentals and sales, with district-wide baselines
-6. **Financial analysis** — gross yield (from the tool) and net yield after the community fee
-7. **Risks and sensitivities** — vacancy, supply pressure, ownership-form liquidity, condition surprises
-8. **Recommendation** — Buy / Walk / Borderline, with a confidence score and a fair-value counter
 
 ## Development
 
@@ -199,7 +211,10 @@ fix(ui): name the agent, not the model, in the progress feed
 │   ├── prompts/              the system prompt
 │   ├── rag/                  market-report corpus — ingest + pgvector retrieval
 │   └── tools/                the eight agent tools
+├── data/                     NBP market-report corpus (PDFs)
+├── docs/                     README assets
 ├── evals/                    ground-truth eval harness
+├── examples/                 a sample investment memo
 ├── tests/                    test suite (CI-gated at 90% coverage)
 └── realestate-agent.toml     project config — overrides Settings defaults
 ```
@@ -214,6 +229,11 @@ The decisions a reviewer might ask about:
 - **Concurrent tool execution.** The model emits tool calls in parallel
   batches; the loop honours that with a thread pool, so a batch's wall time is
   the slowest tool rather than the sum.
+- **RAG: ingest once, query per run.** The NBP market-report corpus is
+  chunked, embedded with Voyage, and stored in pgvector by a one-off,
+  idempotent `src.rag.ingest` run — never in the request path. At analysis
+  time the agent only does the read side (embed query, cosine-search), so the
+  deployed app needs a Postgres connection, not a PDF pipeline.
 - **OpenStreetMap, not the Warsaw city API.** `api.um.warszawa.pl` is
   geo-blocked outside Poland — unusable in CI or for anyone cloning the repo
   abroad. OSM has equivalent Warsaw coverage, is globally reachable, and needs
