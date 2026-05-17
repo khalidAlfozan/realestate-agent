@@ -31,11 +31,14 @@ A 73 m² four-room ground-floor apartment, post-renovation.
 ## 2. Neighbourhood context
 Wola — Warsaw's fastest-growing district.
 
-## 3. Condition assessment
+## 3. Market backdrop
+NBP's 2024-Q1 report shows Warsaw price growth cooling and rental rates softening q/q.
+
+## 4. Condition assessment
 Seller claims fully renovated. **Photo-derived condition: EXCELLENT (high confidence, 8 photos analysed).**
 The visual evidence supports the seller's narrative.
 
-## 4. Comparables
+## 5. Comparables
 
 ### Rentals (for monthly-rent estimate)
 - **Comp set:** 37 rentals from `find_comparable_properties(transaction_type="rent")` for Wola, 3–5 rooms, 58–88 m².
@@ -47,18 +50,18 @@ The visual evidence supports the seller's narrative.
 - Median: 19 548 PLN/m².
 - ~10% discount vs median.
 
-## 5. Financial analysis
+## 6. Financial analysis
 - Asking price: 1 290 000 PLN.
 - Estimated monthly rent: 6 424 PLN.
 - Annual rent: 77 088 PLN.
 - **Gross yield: 5.98%** (from `calculate_gross_yield`).
 
-## 6. Risks and sensitivities
+## 7. Risks and sensitivities
 - **Limited ownership liquidity risk:** Spółdzielcze własnościowe complicates financing.
 - **Ground floor discount.** Vacancy risk is real.
 - **Czynsz 12.7 PLN/m².** Within normal range but a fixed drag.
 
-## 7. Recommendation
+## 8. Recommendation
 
 **Verdict:** Borderline — Buy with conditions.
 **Confidence:** Medium.
@@ -97,13 +100,13 @@ class TestParseMemo:
         result = parse_memo(_SAMPLE_MEMO)
         assert result.sale_comp_count == 32
 
-    def test_risks_text_captures_section_6_only(self) -> None:
+    def test_risks_text_captures_section_7_only(self) -> None:
         """The risks_text field is used for substring-matching assertions —
-        it must include §6 content but not bleed into §7."""
+        it must include §7 content but not bleed into §8."""
         result = parse_memo(_SAMPLE_MEMO)
         assert "spółdzielcze" in result.risks_text.lower()
         assert "ground floor" in result.risks_text.lower()
-        # §7 content should NOT appear (would let "Borderline" leak in).
+        # §8 content should NOT appear (would let "Borderline" leak in).
         assert "Borderline" not in result.risks_text
 
     def test_returns_none_on_missing_fields(self) -> None:
@@ -120,13 +123,13 @@ class TestParseMemo:
         assert result.sale_comp_count is None
 
     def test_handles_walk_verdict(self) -> None:
-        memo = "## 7. Recommendation\n\n**Verdict:** Walk.\n**Confidence:** High."
+        memo = "## 8. Recommendation\n\n**Verdict:** Walk.\n**Confidence:** High."
         result = parse_memo(memo)
         assert result.verdict == "Walk"
         assert result.confidence == "High"
 
     def test_handles_buy_verdict(self) -> None:
-        memo = "## 7. Recommendation\n\n**Verdict:** Buy.\n**Confidence:** Low."
+        memo = "## 8. Recommendation\n\n**Verdict:** Buy.\n**Confidence:** Low."
         result = parse_memo(memo)
         assert result.verdict == "Buy"
         assert result.confidence == "Low"
@@ -144,7 +147,7 @@ class TestParseMemo:
         this tolerance, the parser silently returns None and the eval reports
         verdict=None (which looks like a regression but is just formatting drift)."""
         memo = (
-            "## 7. Recommendation\n\n"
+            "## 8. Recommendation\n\n"
             "**Verdict: Borderline — leaning Buy, subject to legal due diligence.**\n"
             "**Confidence: Medium.**"
         )

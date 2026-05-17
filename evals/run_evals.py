@@ -21,7 +21,7 @@ from pydantic import TypeAdapter
 from evals import cache as memo_cache
 from evals.models import EvalCase, EvalCheck, EvalResult, Expected, ParsedMemo
 from evals.parse_memo import parse_memo
-from src.agent import SYSTEM_PROMPT, run_agent
+from src.agent import SYSTEM_PROMPT, build_analysis_request, run_agent
 from src.config import require_anthropic_api_key, settings
 
 CASES_FILE = Path(__file__).resolve().parent / "cases.json"
@@ -43,7 +43,7 @@ def run_eval_case(
         if cached:
             return cached, True
 
-    user_message = f"Analyse this Warsaw property as a long-term rental investment: {case.url}"
+    user_message = build_analysis_request(case.url)
     result = run_agent(client, user_message)
     memo = result.memo
     # Belt-and-suspenders preamble strip (mirrors src.cli's behaviour).
