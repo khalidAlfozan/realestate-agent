@@ -28,20 +28,23 @@ flowchart TD
     A[Otodom listing URL] --> B{Structural URL check}
     B -- invalid --> C[Rejected — zero tokens spent]
     B -- valid --> D[Agent loop · Claude Sonnet 4.6]
-    D --> E[8 tools · concurrent within each batch]
-    E --> D
-    D --> F[Investment memo · 8 sections]
+    D --> E[Round 1 · fetch listing details]
+    E --> F[Round 2 · 6 context tools, one parallel batch]
+    F --> G[Round 3 · compute gross yield]
+    G --> H[Round 4 · write the memo]
+    H --> I[Investment memo · 8 sections]
 ```
 
 1. **Validate.** The URL is checked structurally before anything else — a bad
    paste is rejected without constructing the API client or spending a token.
-2. **Drive the loop.** Claude Sonnet 4.6 runs an Anthropic tool-use loop. Each
-   turn it requests a batch of tool calls; the loop executes them and feeds the
-   results back.
-3. **Run tools concurrently.** Tools in a batch are independent and I/O-bound,
-   so they run on a thread pool — a batch costs the slowest tool, not the sum.
-4. **Write the memo.** Once the data is in, the agent produces a fixed
-   eight-section markdown memo.
+2. **Drive the loop.** Claude Sonnet 4.6 runs a hand-rolled tool-use loop —
+   four model rounds: fetch the listing, then pull every context tool in one
+   parallel batch, then compute the gross yield, then write the memo.
+3. **Run tools concurrently.** The round-2 tools are independent and I/O-bound,
+   so the loop runs them on a thread pool — the batch costs the slowest tool,
+   not the sum.
+4. **Write the memo.** The agent's final round is the memo itself — a fixed
+   eight-section markdown document, emitted with no preamble.
 
 ## The investment memo
 
@@ -127,10 +130,11 @@ uv run python -m src "https://www.otodom.pl/pl/oferta/<slug>-ID<id>"
 ```
 
 `ANTHROPIC_API_KEY` is required. The rest are recommended: `GUS_BDL_API_KEY`
-(free) powers district demographics, and `VOYAGE_API_KEY` (free) + `DATABASE_URL`
-power the market-backdrop retrieval. Without each, the agent marks that memo
-section unavailable rather than failing the run. Otodom and OpenStreetMap need
-no key.
+(free) powers district demographics; `VOYAGE_API_KEY` (free) and `DATABASE_URL`
+power the market-backdrop retrieval — which also needs a one-off corpus
+ingestion (see [Market-report retrieval](#market-report-retrieval-rag)). Without
+any of these the agent marks that memo section unavailable rather than failing
+the run. Otodom and OpenStreetMap need no key.
 
 ## Deployment
 
@@ -207,6 +211,8 @@ fix(ui): name the agent, not the model, in the progress feed
 │   ├── prompts/              the system prompt
 │   ├── rag/                  market-report corpus — ingest + pgvector retrieval
 │   └── tools/                the eight agent tools
+├── data/                     NBP market-report corpus (PDFs)
+├── docs/                     README assets
 ├── evals/                    ground-truth eval harness
 ├── examples/                 a sample investment memo
 ├── tests/                    test suite (CI-gated at 90% coverage)
