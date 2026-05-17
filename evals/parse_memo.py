@@ -6,12 +6,12 @@ flag it (assertion fails because actual is None) — which is the regression
 behaviour we want.
 
 We extract:
-- §3: Photo-derived condition + how many photos were analysed
-- §4 Rentals: comp count
-- §4 Sales: comp count
-- §5: Gross yield %
-- §6: full body text (for substring assertions)
-- §7: Verdict + Confidence
+- §4: Photo-derived condition + how many photos were analysed
+- §5 Rentals: comp count
+- §5 Sales: comp count
+- §6: Gross yield %
+- §7: full body text (for substring assertions)
+- §8: Verdict + Confidence
 """
 
 from __future__ import annotations
@@ -35,14 +35,14 @@ _CONFIDENCE_RE = re.compile(
     re.IGNORECASE,
 )
 
-# §5 line — "**Gross yield: 5.81%**" or "**Gross yield:** 5.81%" (the agent
+# §6 line — "**Gross yield: 5.81%**" or "**Gross yield:** 5.81%" (the agent
 # sometimes formats it both ways).
 _GROSS_YIELD_RE = re.compile(
     r"\*\*Gross yield:?\*?\*?\s*([\d.,]+)\s*%",
     re.IGNORECASE,
 )
 
-# §3 condition line — "Photo-derived condition: EXCELLENT (high confidence, 8 photos analysed)"
+# §4 condition line — "Photo-derived condition: EXCELLENT (high confidence, 8 photos analysed)"
 # Sometimes wrapped in **bold** by the agent.
 _PHOTO_CONDITION_RE = re.compile(
     r"Photo-derived condition[*:]+\s*\*?\*?(\w+)",
@@ -53,7 +53,7 @@ _PHOTOS_ANALYSED_RE = re.compile(
     re.IGNORECASE,
 )
 
-# §4 subsection counts — "Comp set: 37 rentals from..." or "32 sales from...".
+# §5 subsection counts — "Comp set: 37 rentals from..." or "32 sales from...".
 # DOTALL because we cross newlines from the heading to the bullet.
 _RENT_COMP_RE = re.compile(
     r"#+\s*Rentals.*?(\d+)\s+rentals?",
@@ -64,9 +64,9 @@ _SALE_COMP_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
-# §6 body — everything between "## 6. Risks" and "## 7." (or end of memo).
+# §7 body — everything between "## 7. Risks" and "## 8." (or end of memo).
 _RISKS_SECTION_RE = re.compile(
-    r"##\s*6\.\s*Risks.*?(?=##\s*7\.|\Z)",
+    r"##\s*7\.\s*Risks.*?(?=##\s*8\.|\Z)",
     re.IGNORECASE | re.DOTALL,
 )
 
