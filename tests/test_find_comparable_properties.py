@@ -26,8 +26,16 @@ def test_district_slug_strips_polish_diacritics() -> None:
     assert _district_slug("Mokotów") == "mokotow"
     assert _district_slug("Śródmieście") == "srodmiescie"
     assert _district_slug("Żoliborz") == "zoliborz"
-    assert _district_slug("Praga Południe") == "praga-poludnie"
     assert _district_slug("Białołęka") == "bialoleka"
+
+
+def test_district_slug_doubles_hyphen_for_praga_districts() -> None:
+    """Otodom slugs the two hyphenated Warsaw districts with a doubled hyphen
+    — the single-hyphen form 404s. Either input spelling resolves: a listing's
+    district field carries the hyphen, but a space form works too."""
+    assert _district_slug("Praga-Południe") == "praga--poludnie"
+    assert _district_slug("Praga-Północ") == "praga--polnoc"
+    assert _district_slug("Praga Południe") == "praga--poludnie"
 
 
 def test_rooms_filter_expands_plus_minus_one() -> None:
