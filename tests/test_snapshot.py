@@ -63,3 +63,27 @@ def test_replay_miss_falls_back_to_live(tmp_path: Path, monkeypatch: pytest.Monk
         agent._execute_tool("search_market_reports", {"query": "unseen"})
 
     assert calls == ["get_property_details", "search_market_reports"]
+
+
+def test_recording_skips_write_on_exception(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A run that raises partway must not leave a partial snapshot — a later
+    run would otherwise replay the incomplete fixture instead of re-recording."""
+    monkeypatch.setattr(snapshot, "SNAPSHOTS_DIR", tmp_path)
+
+    def fake_execute(name: str, arguments: dict[str, Any]) -> str:
+        return "{}"
+
+    monkeypatch.setattr(agent, "_execute_tool", fake_execute)
+
+    def record_then_fail() -> None:
+        with snapshot.recording("demo"):
+            agent._execute_tool("get_property_details", {"url": "u1"})
+            raise RuntimeError("boom")
+
+    with pytest.raises(RuntimeError, match="boom"):
+        record_then_fail()
+
+    assert not snapshot.snapshot_path("demo").is_file()
+    assert agent._execute_tool is fake_execute  # restored despite the exception

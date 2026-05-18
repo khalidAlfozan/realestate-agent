@@ -59,10 +59,14 @@ def recording(case_id: str) -> Iterator[None]:
         yield
     finally:
         agent._execute_tool = real
-        SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
-        snapshot_path(case_id).write_text(
-            json.dumps(recorded, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
-        )
+    # Write only on clean completion. If the body raised (network drop, a
+    # max_tokens stop, ...) the recording is partial — writing it would make
+    # has_snapshot() true, so later runs would replay the incomplete fixture
+    # instead of re-recording. Leaving no file is the safe state.
+    SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+    snapshot_path(case_id).write_text(
+        json.dumps(recorded, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    )
 
 
 @contextmanager
