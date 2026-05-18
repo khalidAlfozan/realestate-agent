@@ -55,7 +55,10 @@ class AgentSettings(_Section):
     """Settings for the main agent loop (Claude Sonnet 4.6 by default)."""
 
     model: str = "claude-sonnet-4-6"
-    max_tokens: int = 8192
+    # Caps thinking + output for one response. The final turn writes the full
+    # ~5-7k-token memo on top of adaptive-thinking tokens, so this needs
+    # headroom — 8k occasionally truncated a long memo (stop_reason=max_tokens).
+    max_tokens: int = 16384
     # Effort controls thinking depth + overall token spend on Sonnet 4.6.
     # `medium` is the recommended balance for tool-heavy agentic flows.
     effort: Literal["low", "medium", "high", "max"] = "medium"

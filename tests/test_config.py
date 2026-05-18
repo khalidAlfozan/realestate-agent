@@ -60,7 +60,7 @@ class TestSettings:
     def test_defaults_load_when_no_overrides(self) -> None:
         s = Settings()
         assert s.agent.model == "claude-sonnet-4-6"
-        assert s.agent.max_tokens == 8192
+        assert s.agent.max_tokens == 16384
         assert s.agent.effort == "medium"
         assert s.vision.model == "claude-haiku-4-5"
         assert s.vision.default_max_photos == 20

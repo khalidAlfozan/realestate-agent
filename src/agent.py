@@ -206,6 +206,12 @@ def run_agent(
                 elapsed_s=time.monotonic() - started,
             )
 
+        if response.stop_reason == "max_tokens":
+            raise RuntimeError(
+                f"The model hit the max_tokens limit ({settings.agent.max_tokens}) "
+                f"on iteration {iteration + 1} — its output was truncated. Raise "
+                "settings.agent.max_tokens (or set RA_AGENT__MAX_TOKENS)."
+            )
         if response.stop_reason != "tool_use":
             raise RuntimeError(f"Unexpected stop_reason: {response.stop_reason!r}")
 
