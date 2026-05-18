@@ -60,8 +60,9 @@ class AgentSettings(_Section):
     # headroom — 8k occasionally truncated a long memo (stop_reason=max_tokens).
     max_tokens: int = 16384
     # Effort controls thinking depth + overall token spend on Sonnet 4.6.
-    # `medium` is the recommended balance for tool-heavy agentic flows.
-    effort: Literal["low", "medium", "high", "max"] = "medium"
+    # `high` — the memo is a reasoning-heavy, low-volume task, so deeper
+    # thinking is worth the extra token spend.
+    effort: Literal["low", "medium", "high", "max"] = "high"
 
 
 class VisionSettings(_Section):

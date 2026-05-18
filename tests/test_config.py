@@ -61,7 +61,7 @@ class TestSettings:
         s = Settings()
         assert s.agent.model == "claude-sonnet-4-6"
         assert s.agent.max_tokens == 16384
-        assert s.agent.effort == "medium"
+        assert s.agent.effort == "high"
         assert s.vision.model == "claude-haiku-4-5"
         assert s.vision.default_max_photos == 20
         assert s.scraping.user_agent.startswith("Mozilla/5.0")
@@ -80,7 +80,7 @@ class TestSettings:
         assert s.agent.model == "claude-opus-4-7"
         assert s.agent.max_tokens == 16000
         # Untouched fields keep their defaults.
-        assert s.agent.effort == "medium"
+        assert s.agent.effort == "high"
 
     def test_env_var_overrides_top_level_field(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("RA_MEMO_PREAMBLE_MARKER", "# Memo:")

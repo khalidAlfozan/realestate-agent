@@ -93,6 +93,12 @@ class TestParseMemo:
         result = parse_memo(_SAMPLE_MEMO)
         assert result.photos_analysed == 8
 
+    def test_photos_analysed_handles_images_phrasing(self) -> None:
+        """For CGI-rendering (off-plan) listings the agent writes 'N images
+        analysed' rather than 'N photos analysed' — the parser accepts both."""
+        memo = "Photo-derived condition: EXCELLENT (high confidence, 7 images analysed)."
+        assert parse_memo(memo).photos_analysed == 7
+
     def test_extracts_rent_comp_count(self) -> None:
         result = parse_memo(_SAMPLE_MEMO)
         assert result.rent_comp_count == 37

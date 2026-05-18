@@ -49,7 +49,9 @@ _PHOTO_CONDITION_RE = re.compile(
     re.IGNORECASE,
 )
 _PHOTOS_ANALYSED_RE = re.compile(
-    r"(\d+)\s+photos?\s+analysed",
+    # "photos" for real listings; "images" when the listing is CGI renderings
+    # (off-plan units) — the agent picks the honest word for what it analysed.
+    r"(\d+)\s+(?:photos?|images?)\s+analysed",
     re.IGNORECASE,
 )
 
