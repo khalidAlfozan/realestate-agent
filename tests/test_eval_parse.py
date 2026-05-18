@@ -48,13 +48,14 @@ The visual evidence supports the seller's narrative.
 ### Sales (for asking-price fairness)
 - **Comp set:** 32 sales from `find_comparable_properties(transaction_type="sale")` for the same filters.
 - Median: 19 548 PLN/m².
-- ~10% discount vs median.
+- **Verdict: ~10% discount to the comp median.**
 
 ## 6. Financial analysis
 - Asking price: 1 290 000 PLN.
 - Estimated monthly rent: 6 424 PLN.
 - Annual rent: 77 088 PLN.
 - **Gross yield: 5.98%** (from `calculate_gross_yield`).
+- **Verdict:** the gross yield sits within the typical Warsaw 5–7% range.
 
 ## 7. Risks and sensitivities
 - **Limited ownership liquidity risk:** Spółdzielcze własnościowe complicates financing.
@@ -156,7 +157,41 @@ class TestParseMemo:
         assert result.confidence == "Medium"
 
     def test_handles_whole_bold_walk_verdict(self) -> None:
-        memo = "**Verdict: Walk — overpriced for condition.**\n**Confidence: High.**"
+        memo = (
+            "## 8. Recommendation\n\n"
+            "**Verdict: Walk — overpriced for condition.**\n**Confidence: High.**"
+        )
         result = parse_memo(memo)
         assert result.verdict == "Walk"
         assert result.confidence == "High"
+
+    def test_verdict_scoped_to_recommendation_section(self) -> None:
+        """The agent also writes bolded '**Verdict:**' sub-labels in §5 (price
+        fairness) and §6 (yield). Verdict/confidence must be read from §8, not
+        from the first '**Verdict**' match in the memo."""
+        memo = (
+            "## 5. Comparables\n"
+            "- **Verdict: significant premium** vs the comp-set median.\n\n"
+            "## 6. Financial analysis\n"
+            "- **Verdict:** the gross yield is acceptable on paper.\n\n"
+            "## 8. Recommendation\n\n"
+            "**Verdict:** Walk — overpriced for the segment.\n"
+            "**Confidence:** High.\n"
+        )
+        result = parse_memo(memo)
+        assert result.verdict == "Walk"
+        assert result.confidence == "High"
+
+    def test_comp_counts_handle_listings_phrasing(self) -> None:
+        """The agent phrases the §5 count as 'rentals', 'sale listings', or
+        just 'listings'. The parser anchors on 'Comp set:' + the number."""
+        memo = (
+            "## 5. Comparables\n\n"
+            "### Rentals (for monthly-rent estimate)\n"
+            "- Comp set: 40 rental listings from the rent search.\n\n"
+            "### Sales (for asking-price fairness)\n"
+            "- **Comp set:** 28 listings from the sale search.\n"
+        )
+        result = parse_memo(memo)
+        assert result.rent_comp_count == 40
+        assert result.sale_comp_count == 28
