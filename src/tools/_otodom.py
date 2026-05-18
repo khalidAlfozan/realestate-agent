@@ -15,7 +15,12 @@ _PL_DIACRITICS = str.maketrans(
 
 def district_slug(name: str) -> str:
     """Normalise a Warsaw district name to its Otodom URL slug."""
-    return name.lower().translate(_PL_DIACRITICS).replace(" ", "-")
+    slug = name.lower().translate(_PL_DIACRITICS).replace(" ", "-")
+    # Otodom slugs the two hyphenated Warsaw districts — Praga-Południe and
+    # Praga-Północ — with a doubled hyphen (e.g. "praga--poludnie"); the
+    # single-hyphen form 404s. They are the only Warsaw districts whose name
+    # contains a hyphen, so doubling every hyphen is correct for this input.
+    return slug.replace("-", "--")
 
 
 def percentile(values: list[int], p: float) -> int | None:
