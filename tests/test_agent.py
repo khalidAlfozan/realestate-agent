@@ -67,9 +67,10 @@ def _fake_tool_use_response(
     return msg
 
 
-def _fake_unexpected_stop_response() -> MagicMock:
+def _fake_stopped_response(stop_reason: str) -> MagicMock:
+    """A Message that ends on a non-terminal stop_reason with no content."""
     msg = MagicMock()
-    msg.stop_reason = "max_tokens"
+    msg.stop_reason = stop_reason
     msg.content = []
     msg.usage = _fake_usage()
     return msg
@@ -297,11 +298,20 @@ class TestRunAgent:
         ids = {block["tool_use_id"] for block in snapshots[1]}
         assert ids == {"toolu_a", "toolu_b"}
 
-    def test_unexpected_stop_reason_raises(self) -> None:
-        """If the model returns max_tokens (or anything other than tool_use /
-        end_turn), surface it instead of looping silently."""
+    def test_max_tokens_stop_raises_clear_error(self) -> None:
+        """A max_tokens stop means the response was truncated — surface a clear,
+        actionable error naming the limit, not a generic 'unexpected' message."""
         client = MagicMock()
-        client.messages.create.return_value = _fake_unexpected_stop_response()
+        client.messages.create.return_value = _fake_stopped_response("max_tokens")
+
+        with pytest.raises(RuntimeError, match="max_tokens limit"):
+            run_agent(client, "Analyse")
+
+    def test_unexpected_stop_reason_raises(self) -> None:
+        """Any other non-terminal stop_reason (not tool_use / end_turn) is
+        surfaced instead of looped on silently."""
+        client = MagicMock()
+        client.messages.create.return_value = _fake_stopped_response("refusal")
 
         with pytest.raises(RuntimeError, match="Unexpected stop_reason"):
             run_agent(client, "Analyse")
