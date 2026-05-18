@@ -68,5 +68,285 @@
       "sale_comp_count_min": 20,
       "risks_must_include": ["premium", "mortgage"]
     }
+  },
+  {
+    "id": "mokotow-plac-unii",
+    "url": "https://www.otodom.pl/pl/oferta/chocimska-plac-unii-2-pokoje-ID4Bi5T",
+    "notes": "Inner-ring tier — a 48 m² 2-room flat near Plac Unii, central Mokotów, asking 790,000 PLN (16,434 PLN/m²). Recorded Borderline at 6.28% gross yield: a good yield offset by high czynsz and renovation capex. Sourced for Mokotów coverage and a mid-price central reference.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 5.3,
+      "gross_yield_pct_max": 7.3,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["czynsz", "renovation"]
+    }
+  },
+  {
+    "id": "mokotow-4-room",
+    "url": "https://www.otodom.pl/pl/oferta/komfortowe-4-pokoje-bez-prowizji-ID4Bkhf",
+    "notes": "Inner-ring tier — an 85 m² 4-room family flat in Mokotów (Służewiec), an off-plan unit, asking 1,385,000 PLN (16,315 PLN/m²). Recorded Borderline (leaning Walk) at 6.1% — a transit-poor location and an implausibly low quoted czynsz undercut the headline yield. Sourced for large-flat (4-room) size coverage.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 5.1,
+      "gross_yield_pct_max": 7.1,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["czynsz", "completion"]
+    }
+  },
+  {
+    "id": "ochota-kamienica",
+    "url": "https://www.otodom.pl/pl/oferta/klimatyczne-2-pokojowe-mieszkanie-w-kamienicy-na-starej-ochocie-ID4zUNy",
+    "notes": "Inner-ring tier — a 50 m² 2-room flat in a 1938 pre-war kamienica in Stara Ochota, asking 920,000 PLN (18,218 PLN/m²). Recorded Borderline (leaning Walk) at 4.96% — a fair price, but a thin yield and a top-floor 1938 roof exposure. Sourced for Ochota coverage and a second pre-war-build case alongside srodmiescie-kamienica.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 4.0,
+      "gross_yield_pct_max": 6.0,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["czynsz", "roof"]
+    }
+  },
+  {
+    "id": "ochota-kawalerka",
+    "url": "https://www.otodom.pl/pl/oferta/27-m-kawalerka-centrum-piwnica-w-cenie-ID4ASgp",
+    "notes": "Inner-ring tier — a 27 m² studio (kawalerka) in Ochota, to-renovate, asking 648,000 PLN (23,981 PLN/m²). Recorded Walk at 4.82% — an 18% price premium plus renovation capex. Sourced for the smallest-size segment (1-room studio).",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 3.8,
+      "gross_yield_pct_max": 5.8,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["premium", "renovation"]
+    }
+  },
+  {
+    "id": "zoliborz-artystyczny",
+    "url": "https://www.otodom.pl/pl/oferta/zoliborz-artystyczny-3-pokoje-69-13-m-ostatnie-5-pietro-ID4B41s",
+    "notes": "Central-premium tier — a 69 m² 3-room top-floor flat in Żoliborz Artystyczny, private seller, asking 1,900,000 PLN (27,484 PLN/m²). Recorded Walk at 4.02% — a 24.8% price premium and the suite's lowest gross yield. Sourced for Żoliborz coverage and a premium top-floor case.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 3.0,
+      "gross_yield_pct_max": 5.0,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["premium", "metro"]
+    }
+  },
+  {
+    "id": "zoliborz-ogrodek",
+    "url": "https://www.otodom.pl/pl/oferta/super-cena-52-20-m2-z-ogrodkiem-zoliborz-ID4Bnkx",
+    "notes": "Central-premium tier — a 52 m² 2-room ground-floor flat with a garden in Żoliborz, asking 1,115,000 PLN (21,360 PLN/m²). Recorded Walk at 4.38% — a heavy czynsz and a below-comp discount that prices in the ground-floor position rather than signalling a bargain. Sourced for a second Żoliborz profile at a mid-district price.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 3.4,
+      "gross_yield_pct_max": 5.4,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["czynsz", "discount"]
+    }
+  },
+  {
+    "id": "bielany-panorama",
+    "url": "https://www.otodom.pl/pl/oferta/panorama-warszawy-z-ostatniego-pietra-ID4AJDV",
+    "notes": "Outer tier, sourced as a Buy candidate — a 57 m² 3-room top-floor flat in Bielany, asking 680,000 PLN (11,972 PLN/m²), ~28% below the comp median. Recorded Walk at 6.62% (the suite's highest gross yield): the agent treats the renovation budget and the limited (spółdzielcze) ownership as outweighing the headline yield. Sourced to probe whether a high yield alone triggers a Buy — it does not.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 5.6,
+      "gross_yield_pct_max": 7.6,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["renovation", "spółdzielcze"]
+    }
+  },
+  {
+    "id": "bielany-apartament",
+    "url": "https://www.otodom.pl/pl/oferta/apartament-3-pok-3-tarasy-2-lazienki-ID4BnvC",
+    "notes": "Outer tier — a 67 m² 3-room apartament with three terraces in Bielany, asking 1,449,000 PLN (21,753 PLN/m²). Recorded Walk at 4.14% — a 32% price premium and a high czynsz. Sourced as a premium intra-district contrast to bielany-panorama.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 3.1,
+      "gross_yield_pct_max": 5.1,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["premium", "czynsz"]
+    }
+  },
+  {
+    "id": "ursus-klimatyzacja",
+    "url": "https://www.otodom.pl/pl/oferta/przestronne-dwa-pokoje-z-klimatyzacja-w-ursusie-ID4AjN2",
+    "notes": "Outer tier — a 48 m² 2-room flat with air-conditioning in Ursus, 2020 build, asking 799,000 PLN (16,691 PLN/m²). Recorded Borderline at 5.26% — a high-quality unit priced at the district p75, with extreme local new-build supply. Sourced for Ursus coverage.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 4.3,
+      "gross_yield_pct_max": 6.3,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["premium", "supply"]
+    }
+  },
+  {
+    "id": "ursus-3-room",
+    "url": "https://www.otodom.pl/pl/oferta/3-pokojowe-mieszkanie-54m2-balkon-bezposrednio-ID4ub0X",
+    "notes": "Outer tier — a 55 m² 3-room off-plan flat in Ursus, asking 826,000 PLN (15,120 PLN/m²). Recorded Borderline (leaning Walk) at 5.8% — an undisclosed czynsz and extreme local supply. Sourced for a second Ursus profile in a cheap western district.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 4.8,
+      "gross_yield_pct_max": 6.8,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["czynsz", "supply"]
+    }
+  },
+  {
+    "id": "ursynow-ogrodek",
+    "url": "https://www.otodom.pl/pl/oferta/nowoczesne-mieszkanie-z-ogrodkiem-ID4AeMY",
+    "notes": "Outer tier, sourced as a Buy candidate — a 62 m² modern 3-room flat with a garden in Ursynów (Jeziorki), an off-plan unit, asking 790,000 PLN (12,742 PLN/m²), below the district sale p25. Recorded Walk at 5.09% — developer/delivery risk, no metro and an undisclosed czynsz. The cheap entry price did not translate into a Buy.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 4.1,
+      "gross_yield_pct_max": 6.1,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["czynsz", "metro"]
+    }
+  },
+  {
+    "id": "ursynow-metro-natolin",
+    "url": "https://www.otodom.pl/pl/oferta/mieszkanie-2-pokojowe-z-garazem-ursynow-metro-natolin-ID4Bnm5",
+    "notes": "Outer tier, private seller — a 54 m² 2-room flat with a garage by Metro Natolin, Ursynów, asking 1,098,000 PLN (20,253 PLN/m²). Recorded Walk at 4.37% — a 19% price premium despite the metro proximity. Sourced as a premium intra-district contrast to ursynow-ogrodek.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 3.4,
+      "gross_yield_pct_max": 5.4,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["premium", "czynsz"]
+    }
+  },
+  {
+    "id": "wilanow-3-room",
+    "url": "https://www.otodom.pl/pl/oferta/3-p-mieszkanie-77-65-m-wilanow-garaz-balkon-prestizowa-lokalizacja-ID4BhcT",
+    "notes": "Outer-premium tier — a 78 m² 3-room flat (1996, un-renovated) with a garage in Wilanów, asking 1,350,000 PLN (17,386 PLN/m²), ~15.7% below the comp median. Recorded Borderline at 5.16% — a real discount that mostly reflects the renovation need. Sourced for Wilanów coverage.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 4.2,
+      "gross_yield_pct_max": 6.2,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["renovation", "supply"]
+    }
+  },
+  {
+    "id": "wilanow-penthouse",
+    "url": "https://www.otodom.pl/pl/oferta/penthouse-taras-75-m2-2-lazienki-ciche-ID4B16e",
+    "notes": "Outer-premium tier — an 84 m² 3-room penthouse with a 75 m² terrace in Wilanów, asking 2,299,000 PLN (27,288 PLN/m²), the highest absolute price in the suite. Recorded Walk at 4.13% — a 31% price premium and an extreme 2,500 PLN czynsz. Sourced for a premium penthouse case.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 3.1,
+      "gross_yield_pct_max": 5.1,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["czynsz", "premium"]
+    }
+  },
+  {
+    "id": "wawer-new-build",
+    "url": "https://www.otodom.pl/pl/oferta/wawer-go-2-0-mieszkanie-3-pok-a3-m10-ID4sKnm",
+    "notes": "Outer tier — a 61 m² 3-room new-build flat (Wawer Go 2.0, Falenica), asking 794,000 PLN (13,000 PLN/m²), among the cheapest per-m² in the suite. Recorded Borderline at 6.35% — a fair price and good yield offset by a transit-poor suburb. Wawer is a thin secondary market, so sale_comp_count_min is set to 10 (recorded 16) rather than the usual 20.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 5.3,
+      "gross_yield_pct_max": 7.3,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 10,
+      "risks_must_include": ["completion", "metro"]
+    }
+  },
+  {
+    "id": "wawer-borki",
+    "url": "https://www.otodom.pl/pl/oferta/mieszkanie-3-pokojowe-z-miejscem-parkingowym-na-osiedlu-borki-ID4Bn1m",
+    "notes": "Outer tier, private seller — a 70 m² 3-room flat with parking on Osiedle Borki, Wawer, asking 960,000 PLN (13,675 PLN/m²). Recorded Borderline at 5.25% — an undisclosed czynsz and bus-only transit. Thin secondary market: sale_comp_count_min is set to 10 (recorded 14) rather than the usual 20.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 4.2,
+      "gross_yield_pct_max": 6.2,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 10,
+      "risks_must_include": ["czynsz", "metro"]
+    }
+  },
+  {
+    "id": "bialoleka-ogrod",
+    "url": "https://www.otodom.pl/pl/oferta/przytulne-2-pokojowe-mieszkanie-z-ogrodem-osiedle-szafirowa-aleja-ID4AwEo",
+    "notes": "Outer tier, private seller — a 37 m² 2-room flat with a garden on Osiedle Szafirowa Aleja, Białołęka, asking 600,000 PLN (16,216 PLN/m²). Recorded Walk at 4.8% — a 12.7% price premium for an outer suburb with no rail transit. Sourced for Białołęka coverage.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 3.8,
+      "gross_yield_pct_max": 5.8,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["premium", "metro"]
+    }
+  },
+  {
+    "id": "bialoleka-new-build",
+    "url": "https://www.otodom.pl/pl/oferta/ogrzewanie-podlogowe-rabat-5-wlasnosc-gruntu-ID4BnDG",
+    "notes": "Outer tier — a 38 m² 2-room new-build (shell-finish, under construction) in Białołęka, asking 517,000 PLN (13,728 PLN/m²), the lowest absolute price in the suite. Recorded Borderline (leaning Walk) at 6.03% — completion risk, a supply overhang and a transit deficit. Sourced for a budget-tier new-build profile.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 5.0,
+      "gross_yield_pct_max": 7.0,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["completion", "supply"]
+    }
+  },
+  {
+    "id": "powisle-studio",
+    "url": "https://www.otodom.pl/pl/oferta/doskonala-lokalizacja-powisle-rog-dobrej-i-tamki-ID4ASGm",
+    "notes": "Central tier — a 26 m² studio in Powiśle, Śródmieście, to-renovate, asking 540,000 PLN (20,532 PLN/m²). Recorded Walk at 5.44% — an exceptionally high czynsz per m² and renovation capex undercut a strong central location. Sourced for a central studio profile and a cheap-for-central reference.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 4.4,
+      "gross_yield_pct_max": 6.4,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["czynsz", "renovation"]
+    }
+  },
+  {
+    "id": "wola-ogrodek-taras",
+    "url": "https://www.otodom.pl/pl/oferta/piekny-prywatny-narozny-twoj-ogrodek-59m2-i-taras-28m2-sloneczne-ID4B2cG",
+    "notes": "Inner-ring tier — a 58 m² 3-room off-plan ground-floor flat with a garden and a 28 m² terrace in Wola, asking 1,046,000 PLN (17,990 PLN/m²), ~20% below the comp median. Recorded Borderline at 5.6% — completion risk and a discount that needs explanation. Sourced for a second Wola profile alongside the 1959 reference case.",
+    "expected": {
+      "verdict_in": ["Walk", "Borderline"],
+      "gross_yield_pct_min": 4.6,
+      "gross_yield_pct_max": 6.6,
+      "photos_analysed_min": 1,
+      "rent_comp_count_min": 20,
+      "sale_comp_count_min": 20,
+      "risks_must_include": ["completion", "discount"]
+    }
   }
 ]

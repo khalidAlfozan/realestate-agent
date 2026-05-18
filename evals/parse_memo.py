@@ -53,20 +53,32 @@ _PHOTOS_ANALYSED_RE = re.compile(
     re.IGNORECASE,
 )
 
-# §5 subsection counts — "Comp set: 37 rentals from..." or "32 sales from...".
+# §5 subsection counts — the "Comp set:" bullet opening each subsection,
+# e.g. "Comp set: 37 rentals", "**Comp set:** 27 sale listings", or just
+# "Comp set: 33 listings". Anchor on "Comp set" + the number; the trailing
+# noun (rentals/sales/listings) is phrased inconsistently by the agent.
 # DOTALL because we cross newlines from the heading to the bullet.
 _RENT_COMP_RE = re.compile(
-    r"#+\s*Rentals.*?(\d+)\s+rentals?",
+    r"#+\s*Rentals.*?Comp set[:\s*]*(\d+)",
     re.IGNORECASE | re.DOTALL,
 )
 _SALE_COMP_RE = re.compile(
-    r"#+\s*Sales.*?(\d+)\s+sales?",
+    r"#+\s*Sales.*?Comp set[:\s*]*(\d+)",
     re.IGNORECASE | re.DOTALL,
 )
 
 # §7 body — everything between "## 7. Risks" and "## 8." (or end of memo).
 _RISKS_SECTION_RE = re.compile(
     r"##\s*7\.\s*Risks.*?(?=##\s*8\.|\Z)",
+    re.IGNORECASE | re.DOTALL,
+)
+
+# §8 body — "## 8. Recommendation" to the end of the memo. Verdict and
+# Confidence are extracted from here only: the agent also writes bolded
+# "**Verdict:**" sub-labels in §5 (price fairness) and §6 (yield), so a
+# whole-memo search would grab one of those instead of the recommendation.
+_RECOMMENDATION_SECTION_RE = re.compile(
+    r"##\s*8\.\s*Recommendation.*\Z",
     re.IGNORECASE | re.DOTALL,
 )
 
@@ -107,8 +119,10 @@ def _normalise_verdict(raw: str | None) -> str | None:
 
 
 def parse_memo(memo: str) -> ParsedMemo:
-    verdict = _normalise_verdict(_first_match(_VERDICT_RE, memo))
-    confidence_raw = _first_match(_CONFIDENCE_RE, memo)
+    rec_match = _RECOMMENDATION_SECTION_RE.search(memo)
+    rec_text = rec_match.group(0) if rec_match else ""
+    verdict = _normalise_verdict(_first_match(_VERDICT_RE, rec_text))
+    confidence_raw = _first_match(_CONFIDENCE_RE, rec_text)
     confidence = confidence_raw.title() if confidence_raw else None
 
     risks_match = _RISKS_SECTION_RE.search(memo)
