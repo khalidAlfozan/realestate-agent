@@ -49,9 +49,11 @@ _PHOTO_CONDITION_RE = re.compile(
     re.IGNORECASE,
 )
 _PHOTOS_ANALYSED_RE = re.compile(
-    # "photos" for real listings; "images" when the listing is CGI renderings
-    # (off-plan units) — the agent picks the honest word for what it analysed.
-    r"(\d+)\s+(?:photos?|images?)\s+analysed",
+    # "photos" for real listings; "images" for CGI renderings (off-plan units).
+    # The agent phrases the §4 count as "N photos analysed", "N photos, high
+    # confidence", or just "N images" — match the number + noun, not the
+    # trailing "analysed". The §4 line is the memo's first such mention.
+    r"(\d+)\s+(?:photos?|images?)\b",
     re.IGNORECASE,
 )
 

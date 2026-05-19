@@ -93,6 +93,12 @@ class TestParseMemo:
         result = parse_memo(_SAMPLE_MEMO)
         assert result.photos_analysed == 8
 
+    def test_photos_count_handles_alternate_phrasing(self) -> None:
+        """The agent phrases the §4 count as 'N photos analysed', 'N photos,
+        high confidence', or 'N images' — match the number, not the wording."""
+        assert parse_memo("Photo analysis (17 photos, high confidence)").photos_analysed == 17
+        assert parse_memo("based on 6 images analysed").photos_analysed == 6
+
     def test_photos_analysed_handles_images_phrasing(self) -> None:
         """For CGI-rendering (off-plan) listings the agent writes 'N images
         analysed' rather than 'N photos analysed' — the parser accepts both."""
