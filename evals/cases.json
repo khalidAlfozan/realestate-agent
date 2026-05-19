@@ -16,15 +16,15 @@
   {
     "id": "srodmiescie-kamienica",
     "url": "https://www.otodom.pl/pl/oferta/metro-centrum-inwestycyjne-w-kamienicy-ID4BnyQ",
-    "notes": "Central-premium tier: a 42 m² 2-room flat in a 1930 pre-war kamienica on ul. Żurawia, Śródmieście, marketed for investment. Asking 795,000 PLN (18,929 PLN/m²), ~12% below the comp median. Sourced for central-district and pre-war-build coverage. Recorded Borderline at 5.83%. Yield band 5.1–6.8 brackets the comp p25–p75 (≈5.3–6.3%) the agent picks its rent benchmark from. Risk substrings: the elevated czynsz (20.2 PLN/m²) and the pre-war kamienica building.",
+    "notes": "Central-premium tier: a 42 m² 2-room flat in a 1930 pre-war kamienica on ul. Żurawia, Śródmieście, marketed for investment. Asking 795,000 PLN (18,929 PLN/m²), priced below the comp median. Sourced for central-district and pre-war-build coverage. Recorded Buy at 6.21% after the §8 verdict-calibration change — a solid in-range yield at a genuine discount, the cleanest Buy in the suite. Yield band 5.1–6.8 brackets the comp p25–p75. Risk substrings: the elevated czynsz (20.2 PLN/m²) and the below-comp discount.",
     "expected": {
-      "verdict_in": ["Walk", "Borderline"],
+      "verdict_in": ["Borderline", "Buy"],
       "gross_yield_pct_min": 5.1,
       "gross_yield_pct_max": 6.8,
       "photos_analysed_min": 1,
       "rent_comp_count_min": 20,
       "sale_comp_count_min": 20,
-      "risks_must_include": ["czynsz", "kamienica"]
+      "risks_must_include": ["czynsz", "discount"]
     }
   },
   {
@@ -100,15 +100,15 @@
   {
     "id": "ochota-kamienica",
     "url": "https://www.otodom.pl/pl/oferta/klimatyczne-2-pokojowe-mieszkanie-w-kamienicy-na-starej-ochocie-ID4zUNy",
-    "notes": "Inner-ring tier — a 50 m² 2-room flat in a 1938 pre-war kamienica in Stara Ochota, asking 920,000 PLN (18,218 PLN/m²). Recorded Borderline (leaning Walk) at 4.96% — a fair price, but a thin yield and pre-1939 building risk. Sourced for Ochota coverage and a second pre-war-build case alongside srodmiescie-kamienica.",
+    "notes": "Inner-ring tier — a 50 m² 2-room top-floor flat in a 1938 pre-war kamienica in Stara Ochota, asking 920,000 PLN (18,218 PLN/m²), priced at the comp median. Sourced for Ochota coverage and a second pre-war-build case alongside srodmiescie-kamienica. Recorded Buy at 5.87% after the §8 verdict-calibration change — a marginal Buy: the in-range yield rests on a p75 rent benchmark, making this the suite's most rent-sensitive Buy. Risk substrings: the elevated czynsz (16.8 PLN/m²) and top-floor roof exposure.",
     "expected": {
-      "verdict_in": ["Walk", "Borderline"],
+      "verdict_in": ["Borderline", "Buy"],
       "gross_yield_pct_min": 4.0,
       "gross_yield_pct_max": 6.0,
       "photos_analysed_min": 1,
       "rent_comp_count_min": 20,
       "sale_comp_count_min": 20,
-      "risks_must_include": ["czynsz", "parking"]
+      "risks_must_include": ["czynsz", "roof"]
     }
   },
   {
