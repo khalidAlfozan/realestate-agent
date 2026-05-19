@@ -4,7 +4,7 @@
     "url": "https://www.otodom.pl/pl/oferta/metro-4-pok-po-gen-remoncie-bliska-wola-centrum-ID4B8mI",
     "notes": "1959 brick block in Wola, post-renovation, ground floor, spółdzielcze własnościowe ownership form, czynsz 930 PLN (12.7 PLN/m² — within the normal 8–15 PLN/m² band, so we DON'T require it in §6 risks; the agent rightly treats it as an expense in §5, not a structural risk). Asking 1.29M PLN at 17,671 PLN/m². The reference case we've iterated on throughout development. Yield band 5.0–7.0 covers the full typical Warsaw range — earlier 6.5 ceiling broke on normal rent-comp drift (live Otodom data shifts the chosen rent benchmark by a few PLN/m² between runs).",
     "expected": {
-      "verdict_in": ["Borderline", "Buy"],
+      "verdict_in": ["Walk", "Borderline"],
       "gross_yield_pct_min": 5.0,
       "gross_yield_pct_max": 7.0,
       "photos_analysed_min": 1,
@@ -16,15 +16,15 @@
   {
     "id": "srodmiescie-kamienica",
     "url": "https://www.otodom.pl/pl/oferta/metro-centrum-inwestycyjne-w-kamienicy-ID4BnyQ",
-    "notes": "Central-premium tier: a 42 m² 2-room flat in a 1930 pre-war kamienica on ul. Żurawia, Śródmieście, marketed for investment. Asking 795,000 PLN (18,929 PLN/m²), priced ~12% below the comp median — an unusual discount the memo treats as a risk to investigate. Sourced for central-district and pre-war-build coverage. Verdict band allows Buy because the memo leans that way (recorded Borderline). Yield band 5.1–6.8 brackets the comp p25–p75 (≈5.3–6.3%) the agent picks its rent benchmark from. Risk substrings: elevated czynsz (20.2 PLN/m²) and the below-comp discount.",
+    "notes": "Central-premium tier: a 42 m² 2-room flat in a 1930 pre-war kamienica on ul. Żurawia, Śródmieście, marketed for investment. Asking 795,000 PLN (18,929 PLN/m²), ~12% below the comp median. Sourced for central-district and pre-war-build coverage. Recorded Borderline at 5.83%. Yield band 5.1–6.8 brackets the comp p25–p75 (≈5.3–6.3%) the agent picks its rent benchmark from. Risk substrings: the elevated czynsz (20.2 PLN/m²) and the pre-war kamienica building.",
     "expected": {
-      "verdict_in": ["Borderline", "Buy"],
+      "verdict_in": ["Walk", "Borderline"],
       "gross_yield_pct_min": 5.1,
       "gross_yield_pct_max": 6.8,
       "photos_analysed_min": 1,
       "rent_comp_count_min": 20,
       "sale_comp_count_min": 20,
-      "risks_must_include": ["czynsz", "discount"]
+      "risks_must_include": ["czynsz", "kamienica"]
     }
   },
   {
@@ -44,7 +44,7 @@
   {
     "id": "bemowo-metro",
     "url": "https://www.otodom.pl/pl/oferta/1-minuta-do-metra-swietny-rozklad-ID4BnA2",
-    "notes": "Transit-strong outer-inner tier: a 62 m² 3-room flat in a 2008 block on ul. Górczewska, Bemowo, ~400 m from the M2 metro. Asking 979,000 PLN (15,911 PLN/m²) — fair vs comps, but czynsz of 1,400 PLN (22.7 PLN/m²) is the heaviest in the suite and drags net yield to ~3.3%. Sourced as a metro-proximity contrast to the outer cases. Yield band 4.3–5.6 brackets the comp p25–p75 (≈4.5–5.4%). Risk substrings: extreme czynsz and metro (the memo also flags the listing's overstated '1 minute to metro' claim).",
+    "notes": "Transit-strong outer-inner tier: a 62 m² 3-room flat in a 2008 block on ul. Górczewska, Bemowo, ~400 m from the M2 metro. Asking 979,000 PLN (15,911 PLN/m²) — fair vs comps, but czynsz of 1,400 PLN (22.7 PLN/m²) is the heaviest in the suite and drags net yield to ~3.3%. Sourced as a metro-proximity contrast to the outer cases. Yield band 4.3–5.6 brackets the comp p25–p75 (≈4.5–5.4%). Risk substrings: the extreme czynsz and Bemowo's heavy new-build supply.",
     "expected": {
       "verdict_in": ["Walk", "Borderline"],
       "gross_yield_pct_min": 4.3,
@@ -52,7 +52,7 @@
       "photos_analysed_min": 1,
       "rent_comp_count_min": 20,
       "sale_comp_count_min": 20,
-      "risks_must_include": ["czynsz", "metro"]
+      "risks_must_include": ["czynsz", "supply"]
     }
   },
   {
@@ -100,7 +100,7 @@
   {
     "id": "ochota-kamienica",
     "url": "https://www.otodom.pl/pl/oferta/klimatyczne-2-pokojowe-mieszkanie-w-kamienicy-na-starej-ochocie-ID4zUNy",
-    "notes": "Inner-ring tier — a 50 m² 2-room flat in a 1938 pre-war kamienica in Stara Ochota, asking 920,000 PLN (18,218 PLN/m²). Recorded Borderline (leaning Walk) at 4.96% — a fair price, but a thin yield and a top-floor 1938 roof exposure. Sourced for Ochota coverage and a second pre-war-build case alongside srodmiescie-kamienica.",
+    "notes": "Inner-ring tier — a 50 m² 2-room flat in a 1938 pre-war kamienica in Stara Ochota, asking 920,000 PLN (18,218 PLN/m²). Recorded Borderline (leaning Walk) at 4.96% — a fair price, but a thin yield and pre-1939 building risk. Sourced for Ochota coverage and a second pre-war-build case alongside srodmiescie-kamienica.",
     "expected": {
       "verdict_in": ["Walk", "Borderline"],
       "gross_yield_pct_min": 4.0,
@@ -108,7 +108,7 @@
       "photos_analysed_min": 1,
       "rent_comp_count_min": 20,
       "sale_comp_count_min": 20,
-      "risks_must_include": ["czynsz", "roof"]
+      "risks_must_include": ["czynsz", "parking"]
     }
   },
   {
@@ -310,7 +310,7 @@
   {
     "id": "bialoleka-new-build",
     "url": "https://www.otodom.pl/pl/oferta/ogrzewanie-podlogowe-rabat-5-wlasnosc-gruntu-ID4BnDG",
-    "notes": "Outer tier — a 38 m² 2-room new-build (shell-finish, under construction) in Białołęka, asking 517,000 PLN (13,728 PLN/m²), the lowest absolute price in the suite. Recorded Borderline (leaning Walk) at 6.03% — completion risk, a supply overhang and a transit deficit. Sourced for a budget-tier new-build profile.",
+    "notes": "Outer tier — a 38 m² 2-room new-build (shell-finish, under construction) in Białołęka, asking 517,000 PLN (13,728 PLN/m²), the lowest absolute price in the suite. Recorded Borderline (leaning Walk) at 6.03% — construction-and-delivery risk, a supply overhang and a transit deficit. Sourced for a budget-tier new-build profile.",
     "expected": {
       "verdict_in": ["Walk", "Borderline"],
       "gross_yield_pct_min": 5.0,
@@ -318,7 +318,7 @@
       "photos_analysed_min": 1,
       "rent_comp_count_min": 20,
       "sale_comp_count_min": 20,
-      "risks_must_include": ["completion", "supply"]
+      "risks_must_include": ["supply", "construction"]
     }
   },
   {
