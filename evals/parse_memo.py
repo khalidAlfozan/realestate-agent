@@ -58,16 +58,18 @@ _PHOTOS_ANALYSED_RE = re.compile(
 )
 
 # §5 subsection counts — the "Comp set:" bullet opening each subsection,
-# e.g. "Comp set: 37 rentals", "**Comp set:** 27 sale listings", or just
-# "Comp set: 33 listings". Anchor on "Comp set" + the number; the trailing
-# noun (rentals/sales/listings) is phrased inconsistently by the agent.
+# e.g. "Comp set: 37 rentals", "**Comp set:** 27 sale listings", "Comp set:
+# 33 listings", or "Comp set: only 4 listings" when the segment is thin.
+# Anchor on "Comp set" + the FIRST number that follows; the gap allows
+# interstitial words ("only") and the trailing noun (rentals/sales/listings)
+# is phrased inconsistently by the agent.
 # DOTALL because we cross newlines from the heading to the bullet.
 _RENT_COMP_RE = re.compile(
-    r"#+\s*Rentals.*?Comp set[:\s*]*(\d+)",
+    r"#+\s*Rentals.*?Comp set[^0-9]*?(\d+)",
     re.IGNORECASE | re.DOTALL,
 )
 _SALE_COMP_RE = re.compile(
-    r"#+\s*Sales.*?Comp set[:\s*]*(\d+)",
+    r"#+\s*Sales.*?Comp set[^0-9]*?(\d+)",
     re.IGNORECASE | re.DOTALL,
 )
 

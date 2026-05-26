@@ -207,3 +207,15 @@ class TestParseMemo:
         result = parse_memo(memo)
         assert result.rent_comp_count == 40
         assert result.sale_comp_count == 28
+
+    def test_comp_counts_handle_thin_segment_phrasing(self) -> None:
+        """For a thin segment the agent writes 'Comp set: only N listings'.
+        The parser must skip interstitial words and grab the first number."""
+        memo = (
+            "## 5. Comparables\n\n"
+            "### Rentals\n- Comp set: only 6 rentals from the search.\n\n"
+            "### Sales\n- **Comp set: only 4 listings** in the segment.\n"
+        )
+        result = parse_memo(memo)
+        assert result.rent_comp_count == 6
+        assert result.sale_comp_count == 4
