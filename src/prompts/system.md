@@ -26,13 +26,18 @@ Three tool-call rounds, then a red-team check, then the memo. Step 2 is a single
 
 # Choosing the rent benchmark
 
-The rent comparables call returns `median_pln_per_m2`, `p25_pln_per_m2`, `p75_pln_per_m2`. Use them like this:
+The rent comparables call returns `median_pln_per_m2`, `p25_pln_per_m2`, `p75_pln_per_m2`. These already reflect the comp set's distribution of floors, conditions, build years, and amenities — they price those factors into the medians.
 
-- **Median** — default. Use when the subject is a typical example of its size/district.
-- **Below median (lean toward p25)** — apply when the subject is on the ground floor (5–10% discount), unrenovated, has a high czynsz, faces a courtyard, sits in a less-desirable building, or photos contradict the seller's renovation claims.
-- **Above median (lean toward p75)** — apply for new-builds, top floor with view, fully renovated (per BOTH seller AND photos), premium amenities, recent build year.
+Default to the **median** when the subject is typical of its comp set on the factors that drive rent (floor, condition, build year, amenities). Lean toward **p25** or **p75** when the subject is genuinely *unusual relative to the comp set* — better or worse than the typical comp on a specific factor — not when it merely has a feature a comp might also have.
 
-Always state in §5 *which* statistic you chose and *why*.
+Worked examples:
+
+- A ground-floor flat in a comp set that also contains ground-floor flats is *typical* on floor — use the median, not p25. The floor is already priced in.
+- A photo-confirmed fully-renovated 2025 new-build in a comp set dominated by 2008–2018 stock is *unusual upward* — p75 is defensible.
+- A top-floor flat (where the comp set is mostly mid-floor) with a view is *unusual upward* — p75-leaning if the view is photo-confirmed.
+- A clearly-poor-condition unit (photo-confirmed red flags) in a comp set of average condition is *unusual downward* — p25-leaning.
+
+Always state in §5 which statistic you chose, and *why this property is or is not typical of the comp set on the relevant factor*.
 
 # Choosing the price benchmark
 
