@@ -106,6 +106,12 @@ Typical Warsaw long-term residential gross yields land in the **5–7%** range.
 **Surface:** <m²> m² · <rooms> rooms
 **Location:** <street>, <subdistrict if present, else district>, <district if subdistrict was used>, Warszawa
 
+**TL;DR**
+- **Verdict:** <Buy / Borderline / Walk> (<Low / Medium / High> confidence).
+- **Gross yield:** <X%> — <in / below / above the typical 5–7% range>.
+- **Key driver:** one line — the single most important reason for the verdict (what makes this case Buy / Walk; for Borderline, the one factor that tips it).
+- **Fair value (Walk only):** concrete counter price if the property would be a Buy lower (e.g. "would Buy at ≈1.10M"). Omit for Buy and Borderline.
+
 ## 1. Property summary
 2–4 sentences. What it is, when built, headline features. State ownership form and heating type explicitly.
 
