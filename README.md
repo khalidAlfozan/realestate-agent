@@ -31,24 +31,31 @@ flowchart TD
     D --> E[Round 1 · fetch listing details]
     E --> F[Round 2 · 6 context tools, one parallel batch]
     F --> G[Round 3 · compute gross yield]
-    G --> H[Round 4 · write the memo]
-    H --> I[Investment memo · 8 sections]
+    G --> H[Red-team check · argue the strongest counter-case]
+    H --> I[Write the memo]
+    I --> J[Investment memo · TL;DR + 8 sections]
 ```
 
 1. **Validate.** The URL is checked structurally before anything else — a bad
    paste is rejected without constructing the API client or spending a token.
 2. **Drive the loop.** Claude Sonnet 4.6 runs a hand-rolled tool-use loop —
-   four model rounds: fetch the listing, then pull every context tool in one
-   parallel batch, then compute the gross yield, then write the memo.
+   three tool-call rounds (fetch the listing, pull every context tool in one
+   parallel batch, compute the gross yield), then an explicit **red-team
+   check** that argues the strongest case against the preliminary verdict
+   before committing to it, then the memo itself.
 3. **Run tools concurrently.** The round-2 tools are independent and I/O-bound,
    so the loop runs them on a thread pool — the batch costs the slowest tool,
    not the sum.
-4. **Write the memo.** The agent's final round is the memo itself — a fixed
-   eight-section markdown document, emitted with no preamble.
+4. **Write the memo.** The agent's final output is the memo — a leading
+   **TL;DR** block (verdict, gross yield, key driver, and a fair-value counter
+   for Walks) on top of an eight-section markdown body, emitted with no
+   preamble.
 
 ## The investment memo
 
-Every run produces the same eight-section markdown template:
+Every run produces the same structure: a leading **TL;DR** block — verdict,
+gross yield, the single key driver, and a fair-value counter for Walks — on
+top of an eight-section markdown body:
 
 1. **Property summary** — what it is, when built, ownership form, heating
 2. **Neighbourhood context** — district character, GUS demographics, nearby amenities
@@ -59,11 +66,14 @@ Every run produces the same eight-section markdown template:
 7. **Risks and sensitivities** — vacancy, supply pressure, ownership-form liquidity, condition surprises
 8. **Recommendation** — Buy / Walk / Borderline, with a confidence score and a fair-value counter
 
-A full run is in **[`examples/sample-memo.md`](examples/sample-memo.md)** — it closes with a verdict like:
+A full run is in **[`examples/sample-memo.md`](examples/sample-memo.md)** — a
+1959 Wola flat that opens with:
 
-> **Verdict:** Walk at asking price; Negotiate down. **Confidence:** High.
->
-> The fundamental problem is a trifecta: a 14.7% price premium over comp-set median applied to a ground-floor, FAIR-condition, 1990s concrete-panel block in a no-metro outer district, yielding only 5.18% gross and 4.0% net after the 1,500 PLN monthly czynsz — inadequate for the risk profile. [...] Walk at 1,530,000 PLN; would reconsider at approximately 1,260,000–1,330,000 PLN, where gross yield clears 6.0–6.3%.
+> **TL;DR**
+> - **Verdict:** Borderline (Medium confidence).
+> - **Gross yield:** 5.37% — at the low end of the typical 5–7% range.
+> - **Key driver:** Net yield after czynsz collapses to 4.50%, and three structural features — ground floor, 1959 build, and limited (co-op) ownership — each independently compress rent-pricing power and resale liquidity; together they turn a location- and condition-strong asset into a thin-margin deal at the asking price.
+> - *(Fair value counter: would be a Buy at approx. 1.15M PLN, where gross yield clears 6.0% and net yield approaches 5.1%.)*
 
 ## The tools
 
@@ -158,6 +168,24 @@ A public deployment runs on your Anthropic key, so it is gated by a
 **password**: when `APP_PASSWORD` is set, every visitor must enter it before
 they can run an analysis. Unset — i.e. local dev — the gate is open.
 
+## Eval harness
+
+A ground-truth eval suite of **25 scored cases** across 14 Warsaw districts —
+district tiers (central to outer), build eras (pre-war kamienica to 2025
+new-build), sizes (studio to 4-room), seller types, and price tiers. The
+harness:
+
+- **Snapshots each case's tool I/O** to [`evals/snapshots/`](evals/snapshots),
+  so a case re-runs deterministically against frozen inputs — only the agent
+  LLM stays live. Re-running after a listing has delisted still works.
+- **Grades each case** on verdict, yield band, tool coverage, and risk
+  substrings ([`evals/parse_memo.py`](evals/parse_memo.py)).
+- **Was the gate for the prompt-reasoning pass** ([#62](https://github.com/khalidAlfozan/realestate-agent/pull/62)–[#67](https://github.com/khalidAlfozan/realestate-agent/pull/67))
+  — six reasoning levers tested with before/after numbers on all 25 cases
+  per change; five kept, one reverted as an honest null result.
+
+Run it locally: `uv run python -m evals.run_evals`.
+
 ## Development
 
 ```bash
@@ -247,16 +275,24 @@ The decisions a reviewer might ask about:
 - **Pricing snapshot with a staleness check.** Anthropic doesn't publish
   prices via API, so the cost table is hand-curated with a snapshot date that
   self-warns once it ages past six months.
+- **Eval-gated prompt iteration.** When the system prompt needs to change, the
+  25-case eval suite is the gate — each candidate change is measured against
+  the baseline numbers before it ships. The methodology matters more than any
+  single change.
 
 ## Roadmap
 
 **Built:** the agent loop and all eight tools · CLI and Streamlit interfaces ·
 RAG retrieval over a corpus of NBP market reports (pgvector + Voyage
 embeddings) · a password-gated public deployment · per-run cost / token /
-latency tracking · a ground-truth eval harness · typed configuration · CI with
-linting, type-checking, dependency hygiene, coverage gating, and CodeQL.
+latency tracking · a **25-case ground-truth eval suite** with deterministic
+tool-result snapshots · an **eval-gated prompt-reasoning pass** that tested
+six levers with before/after numbers (five kept, one reverted) · agent
+reliability fixes (Praga district slug, `max_tokens` handling, partial
+snapshot writes) · typed configuration · CI with linting, type-checking,
+dependency hygiene, coverage gating, and CodeQL.
 
-**Next:** expanding the eval suite toward ~25 scored cases.
+**Next:** polish and deploy.
 
 ## Scope
 
