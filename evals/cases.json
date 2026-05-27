@@ -290,7 +290,7 @@
       "photos_analysed_min": 1,
       "rent_comp_count_min": 20,
       "sale_comp_count_min": 10,
-      "risks_must_include": ["czynsz", "transit"]
+      "risks_must_include": ["supply", "transit"]
     }
   },
   {
@@ -346,7 +346,7 @@
       "photos_analysed_min": 1,
       "rent_comp_count_min": 20,
       "sale_comp_count_min": 20,
-      "risks_must_include": ["completion", "discount"]
+      "risks_must_include": ["completion", "czynsz"]
     }
   }
 ]
