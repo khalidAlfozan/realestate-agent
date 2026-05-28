@@ -182,7 +182,9 @@ harness:
   substrings ([`evals/parse_memo.py`](evals/parse_memo.py)).
 - **Was the gate for the prompt-reasoning pass** ([#62](https://github.com/khalidAlfozan/realestate-agent/pull/62)–[#67](https://github.com/khalidAlfozan/realestate-agent/pull/67))
   — six reasoning levers tested with before/after numbers on all 25 cases
-  per change; five kept, one reverted as an honest null result.
+  per change; five kept, one reverted as an honest null result. Full
+  methodology and results writeup:
+  **[`docs/eval-methodology.md`](docs/eval-methodology.md)**.
 
 Run it locally: `uv run python -m evals.run_evals`.
 
