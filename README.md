@@ -6,7 +6,7 @@
 ![Python 3.13](https://img.shields.io/badge/python-3.13-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-**Live demo:** [realestate-agent.streamlit.app](https://realestate-agent.streamlit.app/) — password-gated.
+**Live demo:** [realestate-agent.streamlit.app](https://realestate-agent.streamlit.app/)
 
 Paste an [Otodom](https://www.otodom.pl) listing URL and get back a structured
 long-term-rental investment memo — yield analysis, rent and sale comparables,
