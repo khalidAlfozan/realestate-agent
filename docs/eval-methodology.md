@@ -299,34 +299,3 @@ like a regression caused by Exp 5. With the scoreboard, it traced cleanly
 back to a pre-existing agent quirk, separable from the lever under test.
 You can't always fix what the suite surfaces, but you can avoid
 mis-attributing it.
-
-## What this doesn't prove
-
-- The suite scores **structured fields** (verdict, yield, comp counts, risk
-  substrings). It does not score *prose quality*, *novel-insight-per-memo*,
-  or *whether the verdict was right*. A ground-truth verdict is unknowable
-  here; the bands are what an informed reader would call defensible, not
-  certified-correct.
-- The cases are Warsaw 2025–2026 listings. Out-of-distribution properties
-  (commercial, plots, Kraków) aren't covered. A model upgrade or a domain
-  shift would require re-grading.
-- N=25 is enough to catch shifts of 4+ cases reliably and trends across the
-  full suite, but not enough to resolve fine differences (one case
-  flipping) statistically. The methodology is "shifted assertions trigger a
-  side-by-side read," not "p<0.05."
-- An ablation against a no-prompt-changes control wasn't run — the
-  before/after baselines *are* the control, but they bake in the same
-  re-runs that Tool I/O snapshots make deterministic; LLM variance between
-  runs is not measured separately. The shipped wins are visible enough
-  (`bemowo` consistency restored, `wola-1959` double-counting fixed) that
-  I'm confident they aren't run-to-run noise.
-
-## Why I built it this way
-
-I'm a solo builder, this is a portfolio project, and the temptation to
-ship a prompt change because it "feels better" is real — every iteration
-that doesn't ship is one I don't put in the changelog. The eval suite is
-the discipline that keeps me from drifting toward what looks good and away
-from what is good. Six experiments, five ships, one quiet revert. That
-ratio is the methodology working as designed; if it had been six-for-six,
-the suite wouldn't have been doing its job.

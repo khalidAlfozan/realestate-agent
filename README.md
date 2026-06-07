@@ -282,20 +282,6 @@ The decisions a reviewer might ask about:
   the baseline numbers before it ships. The methodology matters more than any
   single change.
 
-## Roadmap
-
-**Built:** the agent loop and all eight tools · CLI and Streamlit interfaces ·
-RAG retrieval over a corpus of NBP market reports (pgvector + Voyage
-embeddings) · a password-gated public deployment · per-run cost / token /
-latency tracking · a **25-case ground-truth eval suite** with deterministic
-tool-result snapshots · an **eval-gated prompt-reasoning pass** that tested
-six levers with before/after numbers (five kept, one reverted) · agent
-reliability fixes (Praga district slug, `max_tokens` handling, partial
-snapshot writes) · typed configuration · CI with linting, type-checking,
-dependency hygiene, coverage gating, and CodeQL.
-
-**Next:** polish and deploy.
-
 ## Scope
 
 Deliberately narrow — this is a focused v1, not a platform:
