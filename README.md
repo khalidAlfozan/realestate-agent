@@ -19,7 +19,7 @@ It is a hand-rolled Claude agent: a tool-use loop built directly on the
 Anthropic SDK — no agent framework — that calls eight deterministic tools to
 gather data and then writes the memo.
 
-![The Warsaw Rental Investment Analyst app analysing an Otodom listing](docs/screenshot.png)
+![The Warsaw Rental Investment Analyst analysing an Otodom listing end to end — paste a URL, watch the agent run its tools, and read the investment memo](docs/demo.gif)
 
 ## How it works
 
