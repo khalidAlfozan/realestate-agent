@@ -13,8 +13,8 @@
 # The main agent loop — Claude Sonnet 4.6 by default. Override per-run via:
 #   RA_AGENT__MODEL=claude-opus-4-7 uv run python -m src <url>
 # model = "claude-sonnet-4-6"
-# max_tokens = 8192
-# effort = "medium"  # low | medium | high | max
+# max_tokens = 16384
+# effort = "high"  # low | medium | high | max
 
 [vision]
 # Photo-analysis sub-call uses Haiku 4.5 (cheaper, sufficient for vision).

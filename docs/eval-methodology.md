@@ -54,8 +54,8 @@ count, rent and sale comp counts, and the full §7 risks text. Each case in
 
 - a **verdict band** (e.g. `["Walk", "Borderline"]` — what's acceptable
   given the listing's economics)
-- a **gross yield band** (a min, given the listing's price and rent
-  comparables)
+- a **gross yield band** (a min and a max, given the listing's price and
+  rent comparables)
 - **tool-coverage minimums** (the §5 comp counts have to clear a floor —
   the agent didn't skip the comparables work)
 - **risk substrings** the §7 section has to mention (e.g. for a ground-floor

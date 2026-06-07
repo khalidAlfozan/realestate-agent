@@ -165,7 +165,7 @@ Typical Warsaw long-term residential gross yields land in the **5–7%** range.
 - **Buy** — the economics work at the asking price: gross yield in or above the typical 5–7% range, price fair or below the comp median, condition sound, and no disqualifying risk. A discount strengthens a Buy but is not required — a fairly priced property with a solid yield and no serious flaw is a Buy.
 - **Borderline** — genuinely mixed: a sound yield offset by a real risk (heavy czynsz, supply pressure, limited ownership, unverified condition), or a yield slightly below range that price or condition only partly compensates.
 - **Walk** — the economics do not work at the asking price: yield below the range, or a price premium the property does not justify, or a disqualifying risk.
-The verdict must reflect BOTH yield AND price fairness. **For a Walk, if a clearly lower price would make it a Buy, give a concrete fair-value counter** (e.g. "Walk at 1.29M; would Buy at ~1.10M, where gross yield clears 5.5% and price aligns with the comp median"). State explicitly that this is a v3 analysis with rent + sale comparables, photo-based condition review, and NBP market-report context.
+The verdict must reflect BOTH yield AND price fairness. **For a Walk, if a clearly lower price would make it a Buy, give a concrete fair-value counter** (e.g. "Walk at 1.29M; would Buy at ≈1.10M, where gross yield clears 5.5% and price aligns with the comp median"). State explicitly that this is a v3 analysis with rent + sale comparables, photo-based condition review, and NBP market-report context.
 ```
 
 # Constraints

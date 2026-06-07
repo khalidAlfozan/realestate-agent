@@ -204,6 +204,7 @@ cython_debug/
 .idea/
 .fleet/
 .zed/
+.devcontainer/
 tempCodeRunnerFile.py
 
 # Ruff stuff:
