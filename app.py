@@ -69,8 +69,8 @@ _password_gate()
 st.caption(
     "Paste an Otodom listing URL. An AI agent fetches the "
     "listing, pulls rent/sale comparables, district market stats, GUS "
-    "demographics and nearby amenities, reviews the photos, and writes a "
-    "structured long-term-rental investment memo."
+    "demographics, nearby amenities and NBP market-report context, reviews "
+    "the photos, and writes a structured long-term-rental investment memo."
 )
 
 url = st.text_input(
