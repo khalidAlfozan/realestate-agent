@@ -4,17 +4,17 @@ version = "0.1.0"
 description = "Warsaw residential investment-analyst agent."
 requires-python = ">=3.13"
 dependencies = [
-    "anthropic>=0.112.0",
+    "anthropic>=0.116.0",
     "beautifulsoup4>=4.15.0",
     "httpx>=0.28.1",
-    "pgvector>=0.4.2",
+    "pgvector>=0.5.0",
     "psycopg[binary]>=3.3.4",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.2",
     "pypdf>=6.14.2",
     "python-dotenv>=1.2.2",
-    "streamlit>=1.58.0",
-    "voyageai>=0.4.1",
+    "streamlit>=1.59.1",
+    "voyageai>=0.5.0",
 ]
 
 [dependency-groups]
@@ -24,7 +24,7 @@ dev = [
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "pytest-httpx>=0.36.2",
-    "ruff>=0.15.20",
+    "ruff>=0.15.21",
 ]
 
 [tool.ruff]
